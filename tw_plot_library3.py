@@ -118,6 +118,10 @@ def scatterplot(ax,xvl,yvl,**kwargs):
         title=kwargs['title']
     except:
         title=False
+    try:
+        sizefactor=kwargs['sizefactor']
+    except:
+        sizefactor=3
 
     if dynamic_sizes:
        
@@ -126,18 +130,7 @@ def scatterplot(ax,xvl,yvl,**kwargs):
     else:
         pdb.set_trace()
         s=7
-    #ax.scatter(xvl, yvl, s=7, alpha=0.5,facecolors=facecolor_vl )
-    #ax.scatter(xvl+180, yvl, s=7, alpha=0.5,facecolors=facecolor_vl) 
-        
-    #xlabel_diff,xlabel,ylabel=self.get_splitdata()
-    #plot_type_ind=0
-    #self.adjust_split_ax(ax,xvl,xlabel,ylabel,plot_type_ind,plot_vertical=1)
-
-    #ax[0].scatter(allFliesMeanAnglesA*180/np.pi, allFliesMeanAnglesB*180/np.pi, color='k', zorder=10)
-     #   ax.scatter(allFliesMeanAnglesA*180/np.pi, allFliesMeanAnglesB*180/np.pi + 360., color='k', zorder=10)
-    #ax.errorbar(x=allFliesMeanAnglesA*180/np.pi, y=allFliesMeanAnglesB*180/np.pi, yerr=allFliesAngleVarsB*36, xerr=allFliesAngleVarsA*36, fmt='none', ecolor=[.6, .6, .6], capsize=0, zorder=5)
-#ax.errorbar(x=allFliesMeanAnglesA*180/np.pi, y=allFliesMeanAnglesB*180/np.pi + 360, yerr=allFliesAngleVarsB*36, xerr=allFliesAngleVarsA*36, fmt='none', ecolor=[.6, .6, .6], capsize=0, zorder=5)
-
+   
 
     if ellipse_flag:
         for i,crx in enumerate(xdyn):
@@ -156,9 +149,9 @@ def scatterplot(ax,xvl,yvl,**kwargs):
 
     else:
         
-        ax.scatter(np.array(xvl), np.array(yvl), color='k', s=0.001,alpha=0.4)
+        ax.scatter(np.array(xvl), np.array(yvl), color='k', s=sizefactor,alpha=0.4)
         #pdb.set_trace()
-        ax.scatter(np.array(xvl)+180, np.array(yvl), color='k', s=0.001,alpha=0.4)
+        ax.scatter(np.array(xvl)+180, np.array(yvl), color='k', s=sizefactor,alpha=0.4)
         
         if plot_error_bar:
             ax.errorbar(x=np.array(xvl),y=np.array(yvl),yerr=ydyn*error_scale_factor,xerr=xdyn*error_scale_factor,fmt=None, ecolor=[0.6,0.6,0.6], alpha=0.5,capsize=0, zorder=5)
@@ -484,7 +477,7 @@ def polar_heat_map(ax,heat_data,**kwargs):
         for inds in [0,1]:
             if sep_max_flag:
                 crmax.append(np.max(heat_data[dat_type][inds]))
-        pdb.set_trace()
+        
         clim=[0,0.7*np.max(crmax)]
         for inds in [0,1]:
             mesh=ax[inds].pcolormesh(thetamod,rplot,heat_data[dat_type][inds],cmap='hot',vmin=clim[0],vmax=clim[1])
@@ -523,7 +516,7 @@ def polar_heat_map(ax,heat_data,**kwargs):
     else:
         adjust_polar_ax(ax,plot_power_value,sub_flag) 
 def adjust_polar_ax(ax,plot_power_value,sub_flag,**kwargs):       
-    pdb.set_trace()
+    
     if 'plot_mean' in kwargs:
         
         ax.plot([kwargs['plot_mean'],kwargs['plot_mean']],[0,5],'c')
