@@ -772,6 +772,29 @@ def raw_vector_plot(ax,indt):
     ax.spines['polar'].set_color('none')
     ax.get_xaxis().set_ticks([0,np.pi/2,np.pi,3*np.pi/2])
 
+def rand_scatter(ax, xvls, num_bins, yfloor,max_yrange):
+    #algorithm is to bin the data into n bins, determine indices in those bins
+    #for each bin calculate the relative number in bin as a function of the max size
+    #then calculate the yvalues for those indices
+    
+    xedges=[np.min(xvls),np.max(xvls)]
+    
+    bins=np.linspace(xedges[0],xedges[1],10)
+    
+    hist, bins= np.histogram(xvls, bins=bins)
+    
+    normalized_hist=hist/float(np.max(hist))
+    yvls=np.zeros(len(xvls))
+    for crind,crnormvls in enumerate(normalized_hist):
+        
+        crinds=np.intersect1d(np.where(xvls>=bins[crind])[0],np.where(xvls<=bins[crind+1])[0])
+        
+        yvls[crinds]=yfloor+crnormvls*np.random.random_sample(len(crinds))*max_yrange
+
+    #yrange=[0.07,.09]
+    #yvls=np.random.random_sample(len(diff_vls))*(yrange[1]-yrange[0])+yrange[0]
+    pdb.set_trace()
+    ax.scatter(np.array(xvls), yvls, color='k', s=6,zorder=10,alpha=0.5,edgecolor='none')
 
 def rand_jitter(arr):
     
