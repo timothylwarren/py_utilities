@@ -793,7 +793,7 @@ def rand_scatter(ax, xvls, num_bins, yfloor,max_yrange):
 
     #yrange=[0.07,.09]
     #yvls=np.random.random_sample(len(diff_vls))*(yrange[1]-yrange[0])+yrange[0]
-    pdb.set_trace()
+    
     ax.scatter(np.array(xvls), yvls, color='k', s=6,zorder=10,alpha=0.5,edgecolor='none')
 
 def rand_jitter(arr):
@@ -1109,42 +1109,22 @@ def plot_transects(ax,ave_heatmap_data,**kwargs):
     
     CTR=0
     
-    if PLOT_SECTOR:
-        axpolar=kwargs['ax_schematic']
-        #first plot is from end to zero, and zero to first
-
-        # radius_vls=[0.5,1.0]
-
-        # for crvl in radius_vls:
-        #     xvls=np.linspace(0,2*np.pi,50)
-        #     rvls=crvl*np.ones(50)
-        #     axpolar.plot(xvls,rvls,'k')
-        if shift_vertical_flag:
-            
-            sector_bnds=np.array(bnds)+np.pi/2
-
-        for crind,crbnd in enumerate(sector_bnds):
-            #plot outer ring
-            crcol=colvls[crind]
-            polar_circle(axpolar,crbnd,0.9,color=crcol)
-            
-            
-            axpolar.plot([crbnd[0],crbnd[0]], [0,1],crcol)
-            axpolar.plot([crbnd[1],crbnd[1]], [0,1],crcol)
-
-    
-        axpolar.get_xaxis().set_ticks([0,np.pi/2,np.pi,3*np.pi/2])
-        axpolar.get_xaxis().set_ticklabels(['270','0','90','180'],fontsize=5)
-        axpolar.get_yaxis().set_ticks([0,0.5,1])
-
-        axpolar.get_yaxis().set_ticklabels(['0','0.5','1.0'],fontsize=5)
-
+    if paired_flag:  
+        
+        for inds in [0,1]:
+            plotdt=crdt[inds]
+            pltax=ax[inds]
+            determine_and_plot_transects(pltax,bnds,plotdt)
+    else:
+        plotdt=crdt
+        pltax=ax
+        determine_and_plot_transects(pltax,bnds,plotdt)
         
     #ax.grid()
 
 
-
-
+def determine_and_plot_transects(ax,bnds,crdt):
+    pdb.set_trace()
     for crbnd in bnds:
 
 

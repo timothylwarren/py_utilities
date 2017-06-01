@@ -358,7 +358,8 @@ def make_heat_map(heatdt,**kwargs):
             heatmap_list['redges']=heatmap_list['r'][:,0]
             heatmap_list['thetaedges']=heatmap_list['theta'][0,:]
             
-       
+        cr_heatmap_data=heatmap_list
+
         plt.polar_heat_map(ax,heatmap_list,shift_vertical_flag=True,aligned=aligned_flag,sub_flag=sub_flag,paired_flag=True,sep_max_flag=True)
            
 
