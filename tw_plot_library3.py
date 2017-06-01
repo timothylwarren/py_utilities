@@ -1042,10 +1042,7 @@ def polar_circle(ax,thetavls,rvls,**kwargs):
 
 
 def plot_transects(ax,ave_heatmap_data,**kwargs):
-    try:
-        colvls=kwargs['colvls']
-    except:
-        colvls=['r', 'k' ,'c' ,'b','m','g']
+    
     WRAP_VALS=True
     try:
         PLOT_SECTOR=kwargs['ax_schematic']
@@ -1096,7 +1093,10 @@ def plot_transects(ax,ave_heatmap_data,**kwargs):
     except:
         shift_vertical_flag=True
    
-
+    try:
+        paired_flag=kwargs['paired_flag']
+    except:
+        paired_flag=False
 
     #for instance 72 r vls to make up whole space
     num_r_vls=np.shape(crdt)[0]
@@ -1105,7 +1105,7 @@ def plot_transects(ax,ave_heatmap_data,**kwargs):
     
        
     #bnds=np.linspace(0,num_r_vls,number_of_sectors+1)-(num_r_vls/number_of_sectors)/2
-    summed_vls=[]
+    
     
     CTR=0
     
@@ -1114,17 +1114,21 @@ def plot_transects(ax,ave_heatmap_data,**kwargs):
         for inds in [0,1]:
             plotdt=crdt[inds]
             pltax=ax[inds]
-            determine_and_plot_transects(pltax,bnds,plotdt)
+            determine_and_plot_transects(pltax,bnds,plotdt,redges,theta)
     else:
         plotdt=crdt
         pltax=ax
-        determine_and_plot_transects(pltax,bnds,plotdt)
+        determine_and_plot_transects(pltax,bnds,plotdt,redges,theta)
         
     #ax.grid()
 
 
-def determine_and_plot_transects(ax,bnds,crdt):
-    pdb.set_trace()
+def determine_and_plot_transects(ax,bnds,crdt,redges,theta):
+    try:
+        colvls=kwargs['colvls']
+    except:
+        colvls=['r', 'k' ,'c' ,'b','m','g']
+    summed_vls=[]
     for crbnd in bnds:
 
 

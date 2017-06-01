@@ -372,7 +372,7 @@ def make_heat_map(heatdt,**kwargs):
     if plot_transect_flag:
         base_bnds=np.array([-np.pi/9, np.pi/9])
         bnd_sectors=[base_bnds, base_bnds+np.pi/2, base_bnds+2*np.pi/2, base_bnds+3*np.pi/2]
-        plt.plot_transects(transect_ax,cr_heatmap_data,aligned=True,ax_schematic=ax_schematic,bnds=bnd_sectors)
+        plt.plot_transects(transect_ax,cr_heatmap_data,aligned=True,ax_schematic=ax_schematic,bnds=bnd_sectors,paired_flag=paired_flag)
 
 
 
