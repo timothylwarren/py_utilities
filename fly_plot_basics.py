@@ -349,8 +349,10 @@ def make_heat_map(heatdt,**kwargs):
     except:
         aligned_flag=False
     if sub_flag:
-        cr_heatmap_data=heatdt['sub_heat_map'][plt_type]
         
+        cr_heatmap_data=heatdt['sub_heat_map'][plt_type]
+        plt.polar_heat_map(ax,cr_heatmap_data,shift_vertical_flag=True,aligned=aligned_flag,clim=kwargs['clim_max'],plot_r_bnds=[0.5],sub_flag=sub_flag)
+
     elif paired_flag:
         
         heatmap_list=heatdt['full_heat_map'][plt_type]
@@ -364,7 +366,7 @@ def make_heat_map(heatdt,**kwargs):
            
 
     else:
-        pdb.set_trace()
+        
         cr_heatmap_data=heatdt['full_heat_map'][plt_type]
 
         
@@ -376,7 +378,19 @@ def make_heat_map(heatdt,**kwargs):
 
 
 
-
+def arbitary_transect_from_heat_map(ax,heatdt,**kwargs):
+    try:
+        vecmin=kwargs['vecmin']
+    except:
+        vecmin=0
+    if vecmin:
+        num_inds_to_use=len(np.where(heatdt['thetaedges']>0.9)[0])
+    sub_array=sub_array=heatdt['norm_heat_map_vls'][:,-2:]
+    sumvls=np.sum(sub_array,axis=1)
+    norm_sumvls=sumvls/np.sum(sumvls)
+    
+    ax.step(heatdt['redges'][:-1],norm_sumvls,color='k',drawstyle='steps-post')
+    
 
 
 def plot_wings(indt,ax,**kwargs):

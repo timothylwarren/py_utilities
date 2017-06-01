@@ -482,7 +482,7 @@ def polar_heat_map(ax,heat_data,**kwargs):
         for inds in [0,1]:
             mesh=ax[inds].pcolormesh(thetamod,rplot,heat_data[dat_type][inds],cmap='hot',vmin=clim[0],vmax=clim[1])
     else:
-        pdb.set_trace()
+        
         mesh=ax.pcolormesh(thetamod,rplot,heat_data[dat_type],cmap='hot',vmin=clim[0],vmax=clim[1])
 
     if plot_r_bnds_flag:
