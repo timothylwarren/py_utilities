@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 import fp_library as fpl
 import tw_calc_library as calc
 from matplotlib.patches import Ellipse
+import matplotlib.colorbar as mpl_cbar
 
 import matplotlib.cm as cm
 
@@ -412,6 +413,11 @@ def polar_heat_map(ax,heat_data,**kwargs):
         sub_flag=kwargs['sub_flag']
     except:
         sub_flag=False
+    try:
+        colorbar_ax=kwargs['colorbar_ax']
+        colorbar_flag=True
+    except:
+        colorbar_flag=False
 
     if 'clim' in kwargs:
         clim=np.array([0,kwargs['clim']])
@@ -489,11 +495,13 @@ def polar_heat_map(ax,heat_data,**kwargs):
         rvl=kwargs['plot_r_bnds']
         polar_circle(ax,[0,2*np.pi],rvl,color='w')
         
-
-    #cbar=pylab.colorbar(mesh, ax=ax, shrink=cbar_shrink, pad=cbar_pad,aspect=cbar_aspect)
-    
-    #cbar.ax.yaxis.set_ticks(clim)
-    #cbar.ax.yaxis.set_ticklabels(clim,fontsize=6)
+    if colorbar_flag:
+        pdb.set_trace()
+        cmap=pylab.get_cmap('hot')
+        cbar=mpl_cbar.ColorbarBase(colorbar_ax,cmap=cmap)
+        
+        cbar.ax.yaxis.set_ticks(clim)
+        cbar.ax.yaxis.set_ticklabels(clim,fontsize=6)
 
 
 
