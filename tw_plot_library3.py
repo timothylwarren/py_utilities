@@ -416,6 +416,7 @@ def polar_heat_map(ax,heat_data,**kwargs):
     try:
         colorbar_ax=kwargs['colorbar_ax']
         colorbar_flag=True
+        fig_flag=kwargs['fig_flag']
     except:
         colorbar_flag=False
 
@@ -498,10 +499,11 @@ def polar_heat_map(ax,heat_data,**kwargs):
     if colorbar_flag:
         pdb.set_trace()
         cmap=pylab.get_cmap('hot')
-        cbar=mpl_cbar.ColorbarBase(colorbar_ax,cmap=cmap)
+        #cbar=mpl_cbar.ColorbarBase(colorbar_ax,cmap=cmap,boundaries=[clim[0],clim[1]])
         
-        cbar.ax.yaxis.set_ticks(clim)
-        cbar.ax.yaxis.set_ticklabels(clim,fontsize=6)
+        fig_flag.colorbar(mesh,cax=colorbar_ax)
+        #cbar.ax.yaxis.set_ticks(clim)
+        #cbar.ax.yaxis.set_ticklabels(clim,fontsize=6)
 
 
 

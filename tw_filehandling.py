@@ -25,10 +25,10 @@ def parse_date(fname):
 
 def change_pickle(pickle_fname,param_name,new_param_value):
     params=open_pickle(pickle_fname)
-    try:
-        params[param_name]=new_param_value
-    except:
-        tst=1
+    
+    params[param_name]=new_param_value
+    pdb.set_trace()
+
     save_to_pickle(pickle_fname,params)
 
 
