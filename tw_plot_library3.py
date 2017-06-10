@@ -12,7 +12,23 @@ import matplotlib.colorbar as mpl_cbar
 
 import matplotlib.cm as cm
 
+
+
+from matplotlib.ticker import FuncFormatter
+
+AXISPAD=-3
 pylab.ion()
+
+
+def my_formatter(x, pos):
+    pdb.set_trace()
+    if x.is_integer():
+        return str(int(x))
+    else:
+        return str(x)
+
+
+
 
 
 def plot_legend(crax,positions, colors, strvls):
@@ -132,7 +148,7 @@ def scatterplot(ax,xvl,yvl,**kwargs):
         pdb.set_trace()
         s=7
    
-
+    pdb.set_trace()
     if ellipse_flag:
         for i,crx in enumerate(xdyn):
             
@@ -150,9 +166,9 @@ def scatterplot(ax,xvl,yvl,**kwargs):
 
     else:
         
-        ax.scatter(np.array(xvl), np.array(yvl), color='k', s=sizefactor,alpha=0.4)
+        ax.scatter(np.array(xvl), np.array(yvl),  facecolors='none', edgecolors='k',s=sizefactor,alpha=0.4,marker='o')
         #pdb.set_trace()
-        ax.scatter(np.array(xvl)+180, np.array(yvl), color='k', s=sizefactor,alpha=0.4)
+        ax.scatter(np.array(xvl)+180, np.array(yvl), facecolors='none', edgecolors='k', s=sizefactor,alpha=0.4,marker='o')
         
         if plot_error_bar:
             ax.errorbar(x=np.array(xvl),y=np.array(yvl),yerr=ydyn*error_scale_factor,xerr=xdyn*error_scale_factor,fmt=None, ecolor=[0.6,0.6,0.6], alpha=0.5,capsize=0, zorder=5)
@@ -497,13 +513,32 @@ def polar_heat_map(ax,heat_data,**kwargs):
         polar_circle(ax,[0,2*np.pi],rvl,color='w')
         
     if colorbar_flag:
-        pdb.set_trace()
+        
         cmap=pylab.get_cmap('hot')
         #cbar=mpl_cbar.ColorbarBase(colorbar_ax,cmap=cmap,boundaries=[clim[0],clim[1]])
         
-        fig_flag.colorbar(mesh,cax=colorbar_ax)
-        #cbar.ax.yaxis.set_ticks(clim)
-        #cbar.ax.yaxis.set_ticklabels(clim,fontsize=6)
+        fig_flag.colorbar(mesh,cax=colorbar_ax,ticks=clim)
+        labels=colorbar_ax.yaxis.get_ticklabels()
+        labels[0]='0'
+       
+        for l in colorbar_ax.yaxis.get_ticklabels():
+            l.set_fontsize(6)
+
+    colorbar_ax.spines['top'].set_color('none')
+    colorbar_ax.spines['bottom'].set_color('none')
+    colorbar_ax.spines['left'].set_color('none')
+    colorbar_ax.spines['right'].set_color('none')
+    colorbar_ax.set_ylabel("probability",fontsize=6)
+    colorbar_ax.yaxis.labelpad= AXISPAD   
+
+        #formatter = FuncFormatter(my_formatter)
+
+
+        #colorbar_ax.yaxis.set_major_formatter(formatter)
+#plt.show()
+
+        #colorbar_ax.yaxis.set_ticks(clim)
+        #colorbar_ax.yaxis.set_ticklabels(clim,fontsize=6)
 
 
 
@@ -538,7 +573,7 @@ def adjust_polar_ax(ax,plot_power_value,sub_flag,**kwargs):
     #ax.get_yaxis().set_ticks([])
     if not sub_flag:
         ax.get_xaxis().set_ticks([0,np.pi/2,np.pi,3*np.pi/2])
-        ax.get_xaxis().set_ticklabels(['270','0','90','180'])
+        ax.get_xaxis().set_ticklabels(['270$^\circ$','0$^\circ$','90$^\circ$','180$^\circ$'])
         
         ax.get_yaxis().set_ticks([0,0.5,1.0])
         ax.get_yaxis().set_ticklabels([0,0.5,1.0])
@@ -1165,7 +1200,7 @@ def determine_and_plot_transects(ax,bnds,crdt,redges,theta):
             #plot sector
             
     array_transect_vls=np.array(summed_vls)
-    
+    legend_text=['-45-45','45-135','135-225','225-315']
     for crind,cr_row in enumerate(array_transect_vls):
 
         xvls=theta[0]
@@ -1178,20 +1213,29 @@ def determine_and_plot_transects(ax,bnds,crdt,redges,theta):
             #pdb.set_trace()  
             tst=1
         
-        ax.step(xvlsplt,yplt,color=colvls[crind],drawstyle='steps-post')
         
+        ax.step(xvlsplt[:-1],yplt[:-1],color=colvls[crind],drawstyle='steps-post')
+        position=[1.1,.01+.003*crind]
+        strvl=legend_text[crind]
+        plot_legend(ax,position,colvls[crind], strvl)
         
      
                 
     fpl.adjust_spines(ax,['left','bottom'])
-    ax.get_xaxis().set_ticks([0,0.2,0.4,0.6,0.8,1.0])
-    ax.get_xaxis().set_ticklabels([0,0.2,0.4,0.6,0.8,1.0],fontsize=6)
+    ax.get_xaxis().set_ticks([0,0.5,1.0])
+    ax.get_xaxis().set_ticklabels([0,0.5,1.0],fontsize=6)
     ax.set_xlabel('local vector strength', fontsize=6)
+    ax.yaxis.labelpad= 1
+    ax.xaxis.labelpad=1 
+    ax.set_ylabel('probability',fontsize=6)
     ax.set_xlim([0,1])
+    
+
     #ax.set_ylim([0,.05])
     
 
     ax.set_aspect(40)
-    ax.set_ylim([0,0.03])
-    ax.get_yaxis().set_ticks([0,0.01,0.02,0.03])
-    ax.get_yaxis().set_ticklabels([0,0.01,0.02,0.03],fontsize=6)
+    ax.set_ylim([0,0.04])
+    ax.get_yaxis().set_ticks([0,0.01,0.02,0.03,0.04])
+    ax.get_yaxis().set_ticklabels([0,0.01,0.02,0.03,0.04],fontsize=6)
+    
