@@ -438,8 +438,9 @@ def polar_heat_map(ax,heat_data,**kwargs):
 
     if 'clim' in kwargs:
         clim=np.array([0,kwargs['clim']])
+        calc_clim_flag=False
     else:
-        clim=np.array([0,0.002])
+        calc_clim_flag=True
     if 'aligned' in kwargs:
         if kwargs['aligned']:
             dat_type='realigned_norm_heat_map_vls'
@@ -495,6 +496,12 @@ def polar_heat_map(ax,heat_data,**kwargs):
     
     if shift_vertical_flag:
         thetamod=thetamod+np.pi/2
+    
+    
+    if calc_clim_flag:
+        clim=[0,np.max(heat_data[dat_type])]
+
+
     if paired_flag:  
         crmax=[]
         for inds in [0,1]:
@@ -512,11 +519,12 @@ def polar_heat_map(ax,heat_data,**kwargs):
         rvl=kwargs['plot_r_bnds']
         polar_circle(ax,[0,2*np.pi],rvl,color='w')
         
+   
     if colorbar_flag:
         
         cmap=pylab.get_cmap('hot')
         #cbar=mpl_cbar.ColorbarBase(colorbar_ax,cmap=cmap,boundaries=[clim[0],clim[1]])
-        
+       
         fig_flag.colorbar(mesh,cax=colorbar_ax,ticks=clim)
         labels=colorbar_ax.yaxis.get_ticklabels()
         labels[0]='0'
@@ -524,12 +532,12 @@ def polar_heat_map(ax,heat_data,**kwargs):
         for l in colorbar_ax.yaxis.get_ticklabels():
             l.set_fontsize(6)
 
-    colorbar_ax.spines['top'].set_color('none')
-    colorbar_ax.spines['bottom'].set_color('none')
-    colorbar_ax.spines['left'].set_color('none')
-    colorbar_ax.spines['right'].set_color('none')
-    colorbar_ax.set_ylabel("probability",fontsize=6)
-    colorbar_ax.yaxis.labelpad= AXISPAD   
+        colorbar_ax.spines['top'].set_color('none')
+        colorbar_ax.spines['bottom'].set_color('none')
+        colorbar_ax.spines['left'].set_color('none')
+        colorbar_ax.spines['right'].set_color('none')
+        colorbar_ax.set_ylabel("probability",fontsize=6)
+        colorbar_ax.yaxis.labelpad= AXISPAD   
 
         #formatter = FuncFormatter(my_formatter)
 

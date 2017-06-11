@@ -348,10 +348,29 @@ def make_heat_map(heatdt,**kwargs):
         aligned_flag=kwargs['aligned']
     except:
         aligned_flag=False
+    try:
+        colorbar_ax=kwargs['colorbar_ax']
+        fig_flag=kwargs['fig_flag']
+        plot_colorbar_flag=True
+    except:
+        plot_colorbar_flag=False
+
+
+    try:
+        renorm_flag=kwargs['renorm']
+    except:    
+        renorm_flag=False
     if sub_flag:
         
         cr_heatmap_data=heatdt['sub_heat_map'][plt_type]
-        plt.polar_heat_map(ax,cr_heatmap_data,shift_vertical_flag=True,aligned=aligned_flag,clim=kwargs['clim_max'],plot_r_bnds=[0.5],sub_flag=sub_flag)
+        if renorm_flag:
+            
+            cr_heatmap_data['norm_heat_map_vls']=cr_heatmap_data['norm_heat_map_vls']/sum(sum(cr_heatmap_data['norm_heat_map_vls']))
+
+        if plot_colorbar_flag:
+            plt.polar_heat_map(ax,cr_heatmap_data,shift_vertical_flag=True,aligned=aligned_flag,sub_flag=sub_flag,colorbar_ax=colorbar_ax,fig_flag=kwargs['fig_flag'])
+        else:
+            plt.polar_heat_map(ax,cr_heatmap_data,shift_vertical_flag=True,aligned=aligned_flag,sub_flag=sub_flag)
 
     elif paired_flag:
         
@@ -361,16 +380,22 @@ def make_heat_map(heatdt,**kwargs):
             heatmap_list['thetaedges']=heatmap_list['theta'][0,:]
             
         cr_heatmap_data=heatmap_list
-
-        plt.polar_heat_map(ax,heatmap_list,shift_vertical_flag=True,aligned=aligned_flag,sub_flag=sub_flag,paired_flag=True,sep_max_flag=True)
-           
+        if plot_colorbar_flag:
+            plt.polar_heat_map(ax,heatmap_list,shift_vertical_flag=True,aligned=aligned_flag,sub_flag=sub_flag,paired_flag=True,sep_max_flag=True,colorbar_ax=colorbar_ax,fig_flag=kwargs['fig_flag'])
+        else:
+            plt.polar_heat_map(ax,heatmap_list,shift_vertical_flag=True,aligned=aligned_flag,sub_flag=sub_flag,paired_flag=True,sep_max_flag=True)
 
     else:
-        
+       
         cr_heatmap_data=heatdt['full_heat_map'][plt_type]
-
         
-        plt.polar_heat_map(ax,cr_heatmap_data,shift_vertical_flag=True,aligned=aligned_flag,clim=kwargs['clim_max'],plot_r_bnds=[0.5],sub_flag=sub_flag)
+        if renorm_flag:
+            cr_heatmap_data['norm_heat_map_vls']=cr_heatmap_data['norm_heat_map_vls']/sum(sum(cr_heatmap_data['norm_heat_map_vls']))
+
+        if plot_colorbar_flag:
+            plt.polar_heat_map(ax,cr_heatmap_data,shift_vertical_flag=True,aligned=aligned_flag,sub_flag=sub_flag,colorbar_ax=colorbar_ax,fig_flag=kwargs['fig_flag'])
+        else:
+            plt.polar_heat_map(ax,cr_heatmap_data,shift_vertical_flag=True,aligned=aligned_flag,sub_flag=sub_flag)
     if plot_transect_flag:
         base_bnds=np.array([-np.pi/9, np.pi/9])
         bnd_sectors=[base_bnds, base_bnds+np.pi/2, base_bnds+2*np.pi/2, base_bnds+3*np.pi/2]
