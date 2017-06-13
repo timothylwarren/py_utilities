@@ -10,6 +10,7 @@ import circ as circ
 import cmath as cmath
 import scipy
 import tw_plot_library3 as plt
+import csv
 pylab.ion()
 #from numpy import sin, linspace, pi
 #from pylab import plot, show, title, xlabel, ylabel, subplot
@@ -31,6 +32,60 @@ def heat_map_relative_weights(heatmap,rvalues):
         ratio.append(sum_180/reverse_sum)
 
     return ratio
+#peter weir's function
+def count_ommatidia(dataFileName):
+    numOmmatidia = 1398
+    ox, oy, oz = np.ones(numOmmatidia), np.ones(numOmmatidia), np.ones(numOmmatidia)
+
+    ommatidiumInd = 0
+    with open(dataFileName, 'rb') as csvfile:
+        reader = csv.reader(csvfile, delimiter=',')
+        for row in reader:
+            ox[ommatidiumInd], oy[ommatidiumInd], oz[ommatidiumInd] = float(row[0]), float(row[1]), float(row[2])
+            ommatidiumInd += 1
+
+    # convert to spherical coordinates:
+
+    r = np.sqrt(ox**2 + oy**2)
+
+    ommatidiaElevations = np.arctan2(oz,r)
+    ommatidiaAzimuths = np.arctan2(oy,ox)
+
+    # arena geometry:
+    arenaMirrorCurvatureRadius_mm = 50.
+    arenaMirrorFocalDistance_mm = 25.
+    arenaOuterRadius_mm = 22.
+    arenaInnerRadius_mm = 5.
+
+    yOuter = arenaMirrorFocalDistance_mm + np.sqrt(arenaMirrorCurvatureRadius_mm**2 - arenaOuterRadius_mm**2) - arenaMirrorCurvatureRadius_mm
+    yInner = arenaMirrorFocalDistance_mm + np.sqrt(arenaMirrorCurvatureRadius_mm**2 - arenaInnerRadius_mm**2) - arenaMirrorCurvatureRadius_mm
+
+    arenaOuterElevation = np.pi/2 - np.arctan(arenaOuterRadius_mm/yOuter)
+    arenaInnerElevation = np.pi/2 - np.arctan(arenaInnerRadius_mm/yInner)
+
+    print 'mirror spans an annulus from elevation', arenaOuterElevation*180/np.pi, 'to elevation', arenaInnerElevation*180/np.pi
+    print 'assuming DRA spans entire northern hemisphere and samples evenly across it, this means our stimulus covers', (arenaInnerElevation-arenaOuterElevation)*100./np.pi, 'percent of the DRA'
+
+    ommatidiaViewingMirror = (ommatidiaElevations<arenaInnerElevation) & (ommatidiaElevations>arenaOuterElevation)
+
+    print 'number of ommatidia viewing mirror =', np.sum(ommatidiaViewingMirror.astype('int'))
+    print 'out of', numOmmatidia, 'total ommatidia'
+    print 'so', np.sum(ommatidiaViewingMirror.astype('int'))*100./float(numOmmatidia), 'percent of ommatidia view the mirror'
+
+
+    arena_stats={}
+    arena_stats['ommatidiaAzimuths']=ommatidiaAzimuths
+    arena_stats['ommatidiaElevations']=ommatidiaElevations
+    arena_stats['arenaOuterElevation']=arenaOuterElevation
+    arena_stats['arenaInnerElevation']=arenaInnerElevation
+    arena_stats['ommatidiaViewingMirror']=ommatidiaViewingMirror
+
+    return arena_stats
+
+
+
+
+
 
 def make_histogram_confidence_intervals(indata,bnds,num_bins):
     #calculate histogram n times

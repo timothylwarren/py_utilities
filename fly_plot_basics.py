@@ -283,7 +283,8 @@ def plot_motor(indt,ax,**kwargs):
         fpl.adjust_spines(ax,['left','bottom'])
     if plot_left_axis:
         ax.get_yaxis().set_ticks([0,90,180,270,360])
-        ax.get_yaxis().set_ticklabels(['0$^\circ$','90$^\circ$','180$^\circ$','270$^\circ$','360$^\circ$'],fontsize=9)
+        ax.get_yaxis().set_ticklabels(['0$^\circ$','90$^\circ$','180$^\circ$','270$^\circ$','360$^\circ$'],fontsize=6)
+        ax.set_ylabel('polarizer position', fontsize=6)
     
     if xtickflag:
         xticks=kwargs['xticks']
@@ -298,12 +299,12 @@ def plot_motor(indt,ax,**kwargs):
         if self.last_row_flag:
         #ax.set_ylabel('polarizer heading', fontsize=9)
             ax.get_xaxis().set_ticks(xticks)
-            ax.get_xaxis().set_ticklabels(xticklabels,fontsize=7)
-            ax.set_xlabel('minutes', fontsize=9)
+            ax.get_xaxis().set_ticklabels(xticklabels,fontsize=6)
+            ax.set_xlabel('minutes', fontsize=6)
     except:
         ax.get_xaxis().set_ticks(xticks)
-        ax.get_xaxis().set_ticklabels(xticklabels,fontsize=7)
-        ax.set_xlabel('minutes', fontsize=7)
+        ax.get_xaxis().set_ticklabels(xticklabels,fontsize=6)
+        ax.set_xlabel('minutes', fontsize=6)
     #pdb.set_trace()
     ax.set_xlim(xlim)
     #ax.set_aspect(0.005)
