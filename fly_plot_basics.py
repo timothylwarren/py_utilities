@@ -141,6 +141,7 @@ def plot_motor(indt,ax,**kwargs):
         
         mot_inds=self.calc_zoom_inds(kwargs['zoom_times'])
     else:
+        pdb.set_trace()
         mot_inds=np.arange(0,len(indt['time_in_min']))
         
 
