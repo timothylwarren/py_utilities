@@ -229,21 +229,8 @@ def plot_motor(indt,ax,**kwargs):
         mot=calc.rad_to_deg(calc.standardize_angle(mot_rad,2*np.pi,force_positive=1))
     else:
         mot=mot_tmp
+    sub_plot_motor(ax,time,mot)
     
-    MAXDEGPLOT=355
-    MINDEGPLOT=5
-    plotinds1=np.where(mot<MAXDEGPLOT)
-    plotinds2=np.where(mot>MINDEGPLOT)
-    
-    allinds=np.intersect1d(np.array(plotinds1[0]),np.array(plotinds2[0]))
-    splitinds=np.array_split(allinds,np.array(np.where(np.diff(allinds)!=1))[0]+1) 
-    
-    for rotnum,crsplitinds in enumerate(splitinds):
-        if np.size(crsplitinds):
-            try:
-                ax.plot(time[crsplitinds],mot[crsplitinds],'b')
-            except:
-                pdb.set_trace()
    
     if mnvl:
        
@@ -311,6 +298,31 @@ def plot_motor(indt,ax,**kwargs):
     #ax.set_aspect(0.005)
     
     ax.set_ylim([-20,380])
+
+##
+#This function plots position values in a manner that removes artefactual lines from data wrapping around
+#inputs are 
+#ax, handle to axis
+#time- list of timevalues
+#mot - list of degrees between 0 and 360
+def sub_plot_motor(ax,time,mot):
+
+    MAXDEGPLOT=358
+    MINDEGPLOT=2
+    plotinds1=np.where(mot<MAXDEGPLOT)
+    plotinds2=np.where(mot>MINDEGPLOT)
+    
+    allinds=np.intersect1d(np.array(plotinds1[0]),np.array(plotinds2[0]))
+    splitinds=np.array_split(allinds,np.array(np.where(np.diff(allinds)!=1))[0]+1) 
+    
+    for rotnum,crsplitinds in enumerate(splitinds):
+        if np.size(crsplitinds):
+            try:
+                ax.plot(time[crsplitinds],mot[crsplitinds],'b')
+            except:
+                pdb.set_trace()
+
+
 
 def plot_mot_hist(indt,crax,**kwargs):
     
