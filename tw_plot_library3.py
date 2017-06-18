@@ -16,7 +16,7 @@ import matplotlib.cm as cm
 
 from matplotlib.ticker import FuncFormatter
 
-AXISPAD=-3
+AXISPAD=-5
 pylab.ion()
 
 
@@ -291,18 +291,18 @@ def lolli_plot(ax,head_dt,vec_dt,**kwargs):
                     ax.plot([crhead,crhead],[0,vec_dt[crind]],'r')
 
     
-    for tick in ax.xaxis.get_major_ticks():
-            tick.label1.set_fontsize(8)
-    for tick in ax.yaxis.get_major_ticks():
-        tick.label1.set_fontsize(8)
+    #for tick in ax.xaxis.get_major_ticks():
+     #       tick.label1.set_fontsize(8)
+    #for tick in ax.yaxis.get_major_ticks():
+     #   tick.label1.set_fontsize(8)
         #axh.fill(crdt['xrad'][0:-1]+crdt['rad_per_bin']/2,crdt['normhst'],colvls[i],edgecolor=colvls[i],alpha=0.5,linewidth=1)
-    ax.get_yaxis().set_ticks([0.25,0.5])
+    #ax.get_yaxis().set_ticks([0.25,0.5])
     if shift_vertical:
         ax.get_xaxis().set_ticks([0,np.pi/2,np.pi,3*np.pi/2])
         ax.get_xaxis().set_ticklabels(['270','0','90','180'])
     else:
         ax.get_xaxis().set_ticks([0,np.pi/2,np.pi,3*np.pi/2])
-        ax.get_xaxis().set_ticklabels(['0','90','180', '270'])
+        ax.get_xaxis().set_ticklabels(['0$^\circ$','90$^\circ$','180$^\circ$', '270$^\circ$'])
     #h.set_ylim([0,MAXYVL])
    
     ax.text(0,1.5,'n=%d'%(len(head_dt)),fontsize=6)
@@ -526,9 +526,12 @@ def polar_heat_map(ax,heat_data,**kwargs):
         #cbar=mpl_cbar.ColorbarBase(colorbar_ax,cmap=cmap,boundaries=[clim[0],clim[1]])
        
         fig_flag.colorbar(mesh,cax=colorbar_ax,ticks=clim)
+        colorbar_ax.get_yaxis().set_ticklabels(['0','%.4f'%clim[1]])
         labels=colorbar_ax.yaxis.get_ticklabels()
-        labels[0]='0'
-       
+        
+
+        #labels[0]='0'
+        #labels[1]=
         for l in colorbar_ax.yaxis.get_ticklabels():
             l.set_fontsize(6)
 
@@ -580,15 +583,25 @@ def adjust_polar_ax(ax,plot_power_value,sub_flag,**kwargs):
         ax.set_ylim([0,1])
     #ax.get_yaxis().set_ticks([])
     if not sub_flag:
-        ax.get_xaxis().set_ticks([0,np.pi/2,np.pi,3*np.pi/2])
-        ax.get_xaxis().set_ticklabels(['270$^\circ$','0$^\circ$','90$^\circ$','180$^\circ$'])
+        thetaticks=[0,np.pi/2,np.pi,3*np.pi/2]
+        ax.get_xaxis().set_ticks(thetaticks)
         
-        ax.get_yaxis().set_ticks([0,0.5,1.0])
-        ax.get_yaxis().set_ticklabels([0,0.5,1.0])
+
+        thetalabels=['270$^\circ$','0$^\circ$','90$^\circ$','180$^\circ$']
+        ax.get_xaxis().set_ticklabels(thetalabels)
+        #ax.set_thetagrids(thetaticks, frac=1.3)
+
+        ax.get_yaxis().set_ticks([])
+        ax.get_yaxis().set_ticklabels([])
     else:
+        fpl.adjust_spines(ax,['left','bottom'])
         ax.get_xaxis().set_ticks([np.pi/2,np.pi/2+np.pi/4,np.pi])
-        ax.get_xaxis().set_ticklabels(['0','45','90'])
+        ax.get_xaxis().set_ticklabels(['0$^\circ$','45$^\circ$','90$^\circ$'],fontsize=6)
         ax.set_xlim([np.pi/2,np.pi])
+        ax.get_yaxis().set_ticks([0,0.2,0.4,0.6,0.8,1.0])
+        ax.get_yaxis().set_ticklabels(['0','0.2','0.4','0.6','0.8','1.0'],fontsize=6)
+        ax.set_ylabel('local vector strength',fontsize=6)
+        ax.set_xlabel('polarizer position',fontsize=6)
     for tick in ax.xaxis.get_major_ticks():
             tick.label1.set_fontsize(6)
 
@@ -1182,6 +1195,7 @@ def determine_and_plot_transects(ax,bnds,crdt,redges,theta):
     except:
         colvls=['r', 'k' ,'c' ,'b','m','g']
     summed_vls=[]
+    pdb.set_trace()
     for crbnd in bnds:
 
 
@@ -1208,7 +1222,7 @@ def determine_and_plot_transects(ax,bnds,crdt,redges,theta):
             #plot sector
             
     array_transect_vls=np.array(summed_vls)
-    legend_text=['-45-45','45-135','135-225','225-315']
+    legend_text=['-20$^\circ$ to 20$^\circ$','70$^\circ$ to 110$^\circ$','160$^\circ$ to 200$^\circ$','250$^\circ$ to 290$^\circ$']
     for crind,cr_row in enumerate(array_transect_vls):
 
         xvls=theta[0]
@@ -1223,7 +1237,7 @@ def determine_and_plot_transects(ax,bnds,crdt,redges,theta):
         
         
         ax.step(xvlsplt[:-1],yplt[:-1],color=colvls[crind],drawstyle='steps-post')
-        position=[1.1,.01+.003*crind]
+        position=[1.1,.01+.005*crind]
         strvl=legend_text[crind]
         plot_legend(ax,position,colvls[crind], strvl)
         
