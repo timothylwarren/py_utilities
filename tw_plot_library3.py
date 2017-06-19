@@ -145,10 +145,10 @@ def scatterplot(ax,xvl,yvl,**kwargs):
         xdyn=np.array(dyn_sizes)[:,0]
         ydyn=np.array(dyn_sizes)[:,1]
     else:
-        pdb.set_trace()
+        
         s=7
    
-    pdb.set_trace()
+   
     if ellipse_flag:
         for i,crx in enumerate(xdyn):
             
@@ -417,6 +417,7 @@ def polar_heat_map(ax,heat_data,**kwargs):
     cbar_shrink=0.1
     cbar_pad=.1
     cbar_aspect=10
+    paired_mesh=[]
     try:
         paired_flag=kwargs['paired_flag']
     except:
@@ -511,6 +512,7 @@ def polar_heat_map(ax,heat_data,**kwargs):
         clim=[0,0.7*np.max(crmax)]
         for inds in [0,1]:
             mesh=ax[inds].pcolormesh(thetamod,rplot,heat_data[dat_type][inds],cmap='hot',vmin=clim[0],vmax=clim[1])
+            paired_mesh.append(mesh)
     else:
         
         mesh=ax.pcolormesh(thetamod,rplot,heat_data[dat_type],cmap='hot',vmin=clim[0],vmax=clim[1])
@@ -524,23 +526,40 @@ def polar_heat_map(ax,heat_data,**kwargs):
         
         cmap=pylab.get_cmap('hot')
         #cbar=mpl_cbar.ColorbarBase(colorbar_ax,cmap=cmap,boundaries=[clim[0],clim[1]])
-       
-        fig_flag.colorbar(mesh,cax=colorbar_ax,ticks=clim)
-        colorbar_ax.get_yaxis().set_ticklabels(['0','%.4f'%clim[1]])
-        labels=colorbar_ax.yaxis.get_ticklabels()
+        
+        make_colorbar(fig_flag,mesh,cax=colorbar_ax,ticks=clim)
+
+
+    if type(ax) is list:
+        for inds in [0,1]:
+            adjust_polar_ax(ax[inds],plot_power_value,sub_flag)
+    else:
+        adjust_polar_ax(ax,plot_power_value,sub_flag) 
+
+
+
+def make_colorbar(fig_flag,mesh,**kwargs):
+
+    
+    colorbar_ax=kwargs['cax']
+    clim=kwargs['ticks']
+    
+    fig_flag.colorbar(mesh,**kwargs)
+    colorbar_ax.get_yaxis().set_ticklabels(['0','%.4f'%clim[1]])
+    labels=colorbar_ax.yaxis.get_ticklabels()
         
 
         #labels[0]='0'
         #labels[1]=
-        for l in colorbar_ax.yaxis.get_ticklabels():
-            l.set_fontsize(6)
+    for l in colorbar_ax.yaxis.get_ticklabels():
+        l.set_fontsize(6)
 
-        colorbar_ax.spines['top'].set_color('none')
-        colorbar_ax.spines['bottom'].set_color('none')
-        colorbar_ax.spines['left'].set_color('none')
-        colorbar_ax.spines['right'].set_color('none')
-        colorbar_ax.set_ylabel("probability",fontsize=6)
-        colorbar_ax.yaxis.labelpad= AXISPAD   
+    colorbar_ax.spines['top'].set_color('none')
+    colorbar_ax.spines['bottom'].set_color('none')
+    colorbar_ax.spines['left'].set_color('none')
+    colorbar_ax.spines['right'].set_color('none')
+    colorbar_ax.set_ylabel("probability",fontsize=6)
+    colorbar_ax.yaxis.labelpad= AXISPAD   
 
         #formatter = FuncFormatter(my_formatter)
 
@@ -566,11 +585,7 @@ def polar_heat_map(ax,heat_data,**kwargs):
     #         ax.pcolormesh(thetamod,np.power(plot_power_value,rmod),heat_data[dat_type],cmap='hot',vmin=clim[0],vmax=clim[1])
             #ax.pcolormesh(rvl,theta,heat_data[dat_type][ind],cmap='hot',vmin=clim[0],vmax=clim[1])
 
-    if type(ax) is list:
-        for inds in [0,1]:
-            adjust_polar_ax(ax[inds],plot_power_value,sub_flag)
-    else:
-        adjust_polar_ax(ax,plot_power_value,sub_flag) 
+   
 def adjust_polar_ax(ax,plot_power_value,sub_flag,**kwargs):       
     
     if 'plot_mean' in kwargs:
@@ -860,7 +875,7 @@ def rand_scatter(ax, xvls, num_bins, yfloor,max_yrange):
     #yrange=[0.07,.09]
     #yvls=np.random.random_sample(len(diff_vls))*(yrange[1]-yrange[0])+yrange[0]
     
-    ax.scatter(np.array(xvls), yvls, color='k', s=6,zorder=10,alpha=0.5,edgecolor='none')
+    ax.scatter(np.array(xvls), yvls, color='k', s=2,zorder=10,alpha=0.3,edgecolor='none')
 
 def rand_jitter(arr):
     
@@ -1180,7 +1195,10 @@ def plot_transects(ax,ave_heatmap_data,**kwargs):
         for inds in [0,1]:
             plotdt=crdt[inds]
             pltax=ax[inds]
-            determine_and_plot_transects(pltax,bnds,plotdt,redges,theta)
+            if inds==0:
+                determine_and_plot_transects(pltax,bnds,plotdt,redges,theta,ymax=0.04)
+            else:
+                determine_and_plot_transects(pltax,bnds,plotdt,redges,theta,ymax=0.04,no_legend=True)
     else:
         plotdt=crdt
         pltax=ax
@@ -1189,13 +1207,22 @@ def plot_transects(ax,ave_heatmap_data,**kwargs):
     #ax.grid()
 
 
-def determine_and_plot_transects(ax,bnds,crdt,redges,theta):
+def determine_and_plot_transects(ax,bnds,crdt,redges,theta,**kwargs):
     try:
         colvls=kwargs['colvls']
     except:
         colvls=['r', 'k' ,'c' ,'b','m','g']
     summed_vls=[]
-    pdb.set_trace()
+    
+    try:
+        ymax=kwargs['ymax']
+    except:
+        ymax=0.04
+    try:
+        no_legend=kwargs['no_legend']
+    except:
+        no_legend=False
+
     for crbnd in bnds:
 
 
@@ -1235,11 +1262,13 @@ def determine_and_plot_transects(ax,bnds,crdt,redges,theta):
             #pdb.set_trace()  
             tst=1
         
-        
-        ax.step(xvlsplt[:-1],yplt[:-1],color=colvls[crind],drawstyle='steps-post')
+       
+        ax.step(xvlsplt[:-1],yplt[:-1],color=colvls[crind])
+
         position=[1.1,.01+.005*crind]
         strvl=legend_text[crind]
-        plot_legend(ax,position,colvls[crind], strvl)
+        if not no_legend:
+            plot_legend(ax,position,colvls[crind], strvl)
         
      
                 
@@ -1250,14 +1279,15 @@ def determine_and_plot_transects(ax,bnds,crdt,redges,theta):
     ax.yaxis.labelpad= 1
     ax.xaxis.labelpad=1 
     ax.set_ylabel('probability',fontsize=6)
-    ax.set_xlim([0,1])
+    
+    ax.set_xlim([0,1.05])
     
 
     #ax.set_ylim([0,.05])
     
 
     ax.set_aspect(40)
-    ax.set_ylim([0,0.04])
-    ax.get_yaxis().set_ticks([0,0.01,0.02,0.03,0.04])
-    ax.get_yaxis().set_ticklabels([0,0.01,0.02,0.03,0.04],fontsize=6)
+    ax.set_ylim([0,ymax])
+    ax.get_yaxis().set_ticks(np.arange(0,ymax,0.01))
+    ax.get_yaxis().set_ticklabels(np.arange(0,ymax,0.01),fontsize=6)
     

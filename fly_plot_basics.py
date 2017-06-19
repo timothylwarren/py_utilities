@@ -10,6 +10,7 @@ import tw_calc_library as calc
 #from matplotlib.patches import Ellipse
 
 import matplotlib.cm as cm
+AXISPAD=2
 
 #pylab.ion()
 
@@ -141,7 +142,7 @@ def plot_motor(indt,ax,**kwargs):
         
         mot_inds=self.calc_zoom_inds(kwargs['zoom_times'])
     else:
-        pdb.set_trace()
+       
         mot_inds=np.arange(0,len(indt['time_in_min']))
         
 
@@ -235,8 +236,10 @@ def plot_motor(indt,ax,**kwargs):
     if mnvl:
        
         deg_mn=calc.rad_to_deg(mnvl)
-        ax.plot([0,5],[deg_mn, deg_mn],'r--')
-    
+        ax.plot([0,15],[deg_mn, deg_mn],linestyle='--', dashes=(2, 1),color='r')
+        ax.plot([0,15],[deg_mn+180, deg_mn+180],linestyle='--', dashes=(2, 1),color='r')
+            #ax.plot([0, 1], [0, 1], linestyle='--', dashes=(5, 1)) #length of 5, space of 1
+
 
     if 'plot_start_angle' in kwargs:
         if kwargs['plot_start_angle']:
@@ -254,25 +257,22 @@ def plot_motor(indt,ax,**kwargs):
     
     try:
        
-        if plot_left_axis and self.last_row_flag:
+        if plot_left_axis:
             fpl.adjust_spines(ax,['left','bottom'])
         
-        elif (plot_left_axis is 0) and (self.last_row_flag is 0):
-            #fpl.adjust_spines(ax,[])
-            ax.axis('off')
-        elif (plot_left_axis is 0) and (self.last_row_flag is 1):
+        else:
         
             fpl.adjust_spines(ax,['bottom'])
         
-        elif (plot_left_axis) and (self.last_row_flag==0):
-            ax.axis('off')
+        #elif (plot_left_axis) and (self.last_row_flag==0):
+         #   ax.axis('off')
             #fpl.adjust_spines(ax,['left'])
     except:
         fpl.adjust_spines(ax,['left','bottom'])
     if plot_left_axis:
         ax.get_yaxis().set_ticks([0,90,180,270,360])
         ax.get_yaxis().set_ticklabels(['0$^\circ$','90$^\circ$','180$^\circ$','270$^\circ$','360$^\circ$'],fontsize=6)
-        ax.set_ylabel('polarizer position', fontsize=6)
+        ax.set_ylabel('polarizer', fontsize=6)
     
     if xtickflag:
         xticks=kwargs['xticks']
@@ -296,7 +296,8 @@ def plot_motor(indt,ax,**kwargs):
     #pdb.set_trace()
     ax.set_xlim(xlim)
     #ax.set_aspect(0.005)
-    
+    ax.xaxis.labelpad = AXISPAD
+    ax.yaxis.labelpad= AXISPAD
     ax.set_ylim([-20,380])
 
 ##
