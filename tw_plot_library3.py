@@ -166,9 +166,9 @@ def scatterplot(ax,xvl,yvl,**kwargs):
 
     else:
         
-        ax.scatter(np.array(xvl), np.array(yvl),  facecolors='none', edgecolors='k',s=sizefactor,alpha=0.4,marker='o')
+        ax.scatter(np.array(xvl), np.array(yvl),  facecolors='none', edgecolors='k',s=sizefactor,alpha=0.5,marker='o')
         #pdb.set_trace()
-        ax.scatter(np.array(xvl)+180, np.array(yvl), facecolors='none', edgecolors='k', s=sizefactor,alpha=0.4,marker='o')
+        ax.scatter(np.array(xvl)+180, np.array(yvl), facecolors='none', edgecolors='k', s=sizefactor,alpha=0.5,marker='o')
         
         if plot_error_bar:
             ax.errorbar(x=np.array(xvl),y=np.array(yvl),yerr=ydyn*error_scale_factor,xerr=xdyn*error_scale_factor,fmt=None, ecolor=[0.6,0.6,0.6], alpha=0.5,capsize=0, zorder=5)
@@ -509,7 +509,7 @@ def polar_heat_map(ax,heat_data,**kwargs):
             if sep_max_flag:
                 crmax.append(np.max(heat_data[dat_type][inds]))
         
-        clim=[0,0.7*np.max(crmax)]
+        clim=[0,0.55*np.max(crmax)]
         for inds in [0,1]:
             mesh=ax[inds].pcolormesh(thetamod,rplot,heat_data[dat_type][inds],cmap='hot',vmin=clim[0],vmax=clim[1])
             paired_mesh.append(mesh)
@@ -875,7 +875,9 @@ def rand_scatter(ax, xvls, num_bins, yfloor,max_yrange):
     #yrange=[0.07,.09]
     #yvls=np.random.random_sample(len(diff_vls))*(yrange[1]-yrange[0])+yrange[0]
     
-    ax.scatter(np.array(xvls), yvls, color='k', s=2,zorder=10,alpha=0.3,edgecolor='none')
+    ax.scatter(np.array(xvls), yvls, facecolors='none', s=0.7,zorder=10,alpha=0.5,edgecolors='k')
+    #ax.scatter(np.array(xvl), np.array(yvl),  facecolors='none', edgecolors='k',s=sizefactor,alpha=0.5,marker='o')
+
 
 def rand_jitter(arr):
     
