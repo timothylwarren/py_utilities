@@ -7,6 +7,7 @@ from matplotlib.lines import Line2D
 import tw_plot_library3 as plt
 import fp_library as fpl
 import tw_calc_library as calc
+import tw_filehandling as fh
 #from matplotlib.patches import Ellipse
 
 import matplotlib.cm as cm
@@ -135,7 +136,10 @@ def pad_vector_lists(indt):
 
 
 def plot_motor(indt,ax,**kwargs):
-    
+    try: 
+        save_dt_flag=kwargs['save_dt_flag']
+    except:
+        save_dt_flag=False
     VERTVL=370
     if 'zoom_times' in kwargs:
         type='zoom'
@@ -230,7 +234,8 @@ def plot_motor(indt,ax,**kwargs):
         mot=calc.rad_to_deg(calc.standardize_angle(mot_rad,2*np.pi,force_positive=1))
     else:
         mot=mot_tmp
-    sub_plot_motor(ax,time,mot)
+    
+    sub_plot_motor(ax,time,mot,save_dt_flag=save_dt_flag)
     
    
     if mnvl:
@@ -306,17 +311,30 @@ def plot_motor(indt,ax,**kwargs):
 #ax, handle to axis
 #time- list of timevalues
 #mot - list of degrees between 0 and 360
-def sub_plot_motor(ax,time,mot):
-
-    MAXDEGPLOT=358
-    MINDEGPLOT=2
+def sub_plot_motor(ax,time,mot,**kwargs):
+    try:
+        save_dt_flag=kwargs['save_dt_flag']
+    except:
+        save_dt_flag=False
+    SAVE_EX_DT=True
+    MAXDEGPLOT=359
+    MINDEGPLOT=1
     plotinds1=np.where(mot<MAXDEGPLOT)
     plotinds2=np.where(mot>MINDEGPLOT)
     
     allinds=np.intersect1d(np.array(plotinds1[0]),np.array(plotinds2[0]))
     splitinds=np.array_split(allinds,np.array(np.where(np.diff(allinds)!=1))[0]+1) 
-    
-    for rotnum,crsplitinds in enumerate(splitinds):
+    #added for instructive purposes, generally will be False, so ignore.
+    if save_dt_flag:   
+        ex_dt={}
+        #ex_dt['ax']=ax
+        ex_dt['time']=time
+        ex_dt['mot']=mot
+        ex_dt['splitinds']=splitinds
+        pdb.set_trace()
+        fh.save_to_file('/users/tim/motor_dt.pck', ex_dt)
+
+    for crsplitinds in splitinds:
         if np.size(crsplitinds):
             try:
                 ax.plot(time[crsplitinds],mot[crsplitinds],'b')
