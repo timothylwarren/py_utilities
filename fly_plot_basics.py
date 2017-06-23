@@ -332,10 +332,9 @@ def sub_plot_motor(ax,time,mot,**kwargs):
     #loops through the arrays to plot each value
     for crind,crmot_splitinds in enumerate(mot_split_array):
         if np.size(crmot_splitinds):
-            try:
-                ax.plot(time_split_array[crind],crmot_splitinds,'b')
-            except:
-                pdb.set_trace()
+            
+            ax.plot(time_split_array[crind],crmot_splitinds,'b')
+            
 
 
 
