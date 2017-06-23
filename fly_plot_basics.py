@@ -318,7 +318,10 @@ def sub_plot_motor(ax,time,mot,**kwargs):
         max_allowed_difference=kwargs['max_allowed_difference']
     except:
         max_allowed_difference=200
-    
+    try:
+        plot_flag=kwargs['plot_flag']
+    except:
+        plot_flag=True
     absolute_diff_vls=abs(np.diff(mot))
     #these are indices to split the incoming array because the difference between neighboring
     #values exceeds threshold
@@ -330,12 +333,13 @@ def sub_plot_motor(ax,time,mot,**kwargs):
     time_split_array=np.array_split(time,breakinds+1)
     
     #loops through the arrays to plot each value
-    for crind,crmot_splitinds in enumerate(mot_split_array):
-        if np.size(crmot_splitinds):
+    if plot_flag:
+        for crind,crmot_splitinds in enumerate(mot_split_array):
+            if np.size(crmot_splitinds):
+                
+                ax.plot(time_split_array[crind],crmot_splitinds,'b')
             
-            ax.plot(time_split_array[crind],crmot_splitinds,'b')
-            
-
+    return time_split_array, mot_split_array
 
 
 
