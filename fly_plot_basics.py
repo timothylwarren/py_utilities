@@ -311,35 +311,35 @@ def plot_motor(indt,ax,**kwargs):
 #ax, handle to axis
 #time- list of timevalues
 #mot - list of degrees between 0 and 360
-def sub_plot_motor(ax,time,mot,**kwargs):
-    try:
-        save_dt_flag=kwargs['save_dt_flag']
-    except:
-        save_dt_flag=False
-    SAVE_EX_DT=True
-    MAXDEGPLOT=359
-    MINDEGPLOT=1
-    plotinds1=np.where(mot<MAXDEGPLOT)
-    plotinds2=np.where(mot>MINDEGPLOT)
-    
-    allinds=np.intersect1d(np.array(plotinds1[0]),np.array(plotinds2[0]))
-    splitinds=np.array_split(allinds,np.array(np.where(np.diff(allinds)!=1))[0]+1) 
-    #added for instructive purposes, generally will be False, so ignore.
-    if save_dt_flag:   
-        ex_dt={}
-        #ex_dt['ax']=ax
-        ex_dt['time']=time
-        ex_dt['mot']=mot
-        ex_dt['splitinds']=splitinds
-        pdb.set_trace()
-        fh.save_to_file('/users/tim/motor_dt.pck', ex_dt)
 
-    for crsplitinds in splitinds:
-        if np.size(crsplitinds):
+def sub_plot_motor(ax,time,mot,**kwargs):
+    
+    try:
+        max_allowed_difference=kwargs['max_allowed_difference']
+    except:
+        max_allowed_difference=200
+    
+    absolute_diff_vls=abs(np.diff(mot))
+    #these are indices to split the incoming array because the difference between neighboring
+    #values exceeds threshold
+    breakinds=np.where(absolute_diff_vls>max_allowed_difference)[0]
+    
+    #breakinds+1 is to get correct index
+    #this outputs an array of arrays, which will be plotted
+    mot_split_array=np.array_split(mot,breakinds+1)
+    time_split_array=np.array_split(time,breakinds+1)
+    
+    #loops through the arrays to plot each value
+    for crind,crmot_splitinds in enumerate(mot_split_array):
+        if np.size(crmot_splitinds):
             try:
-                ax.plot(time[crsplitinds],mot[crsplitinds],'b')
+                ax.plot(time_split_array[crind],crmot_splitinds,'b')
             except:
                 pdb.set_trace()
+
+
+
+
 
 
 
