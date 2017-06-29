@@ -87,6 +87,9 @@ def count_ommatidia(dataFileName):
 
 
 
+
+def decimate(crdt,decimate_ratio):
+    return sig.decimate(crdt,decimate_ratio)
 def make_histogram_confidence_intervals(indata,bnds,num_bins):
     #calculate histogram n times
     sumhist=[]
@@ -164,6 +167,16 @@ def compute_bins(ndarray,new_shape,operation):
 
 
 def nanmean_matrix(indata,**kwargs):
+    try:
+        ax=kwargs['axis']
+    except:
+        ax=0
+   
+    mdat=np.ma.masked_array(indata,np.isnan(indata))
+    mm=np.mean(mdat,axis=ax)
+    return mm
+
+def nanmedian_matrix(indata,**kwargs):
     try:
         ax=kwargs['axis']
     except:
