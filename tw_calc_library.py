@@ -89,7 +89,10 @@ def count_ommatidia(dataFileName):
 
 
 def decimate(crdt,decimate_ratio):
-    return sig.decimate(crdt,decimate_ratio)
+    #remove first N values as they appear to be erroneous
+    chop_values=10
+    tst=sig.decimate(crdt,decimate_ratio)
+    return tst[chop_values:]
 def make_histogram_confidence_intervals(indata,bnds,num_bins):
     #calculate histogram n times
     sumhist=[]
@@ -183,7 +186,8 @@ def nanmedian_matrix(indata,**kwargs):
         ax=0
    
     mdat=np.ma.masked_array(indata,np.isnan(indata))
-    mm=np.mean(mdat,axis=ax)
+    
+    mm=np.median(mdat,axis=ax)
     return mm
 
 def steppify(arr,isX=False,interval=0):

@@ -87,7 +87,7 @@ def read_days(input_file):
         anal_type='pair'
     
     crdate=convert_days_to_array(date_array,date)
-    
+   
     reader.close()
     
     if type(crdate) is float:

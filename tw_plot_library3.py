@@ -3,6 +3,7 @@
 import pdb
 import pylab
 import numpy as np
+import matplotlib as mpl
 from matplotlib.lines import Line2D  
 import matplotlib.pyplot as plt
 import fp_library as fpl
@@ -32,6 +33,8 @@ def my_formatter(x, pos):
 
 
 def plot_legend(crax,positions, colors, strvls):
+    
+
     if type(positions[0]) is list:
         for crind, crposition in enumerate(positions):
             crax.text(crposition[0],crposition[1],strvls[crind],fontsize=5,color=colors[crind])
@@ -422,10 +425,15 @@ def polar_heat_map(ax,heat_data,**kwargs):
         paired_flag=kwargs['paired_flag']
     except:
         paired_flag=False
+    
     try:
-        plot_r_bnds_flag=kwargs['plot_r_bnds']
+
+        arc_positions=kwargs['arc_positions']
+        arc_colors=kwargs['arc_colors']
+        plot_arc_flag=True
     except:
-        plot_r_bnds_flag=False
+        pdb.set_trace()
+        plot_arc_flag=False
     try:
         sub_flag=kwargs['sub_flag']
     except:
@@ -517,10 +525,15 @@ def polar_heat_map(ax,heat_data,**kwargs):
         
         mesh=ax.pcolormesh(thetamod,rplot,heat_data[dat_type],cmap='hot',vmin=clim[0],vmax=clim[1])
 
-    if plot_r_bnds_flag:
-        rvl=kwargs['plot_r_bnds']
-        polar_circle(ax,[0,2*np.pi],rvl,color='w')
-        
+    #pdb.set_trace()
+    
+    if plot_arc_flag:
+        arc_r_pos=1.05
+        for crind,crarcpair in enumerate(arc_positions):
+            #rvl=kwargs['plot_r_bnpds']
+            polar_circle(ax,crarcpair,arc_r_pos,color=arc_colors[crind],linewidth=2)
+        pdb.set_trace()
+        polar_circle(ax,[0,2*np.pi-.0001],1,color='0.5',linewidth=0.5) 
    
     if colorbar_flag:
         
@@ -544,22 +557,25 @@ def make_colorbar(fig_flag,mesh,**kwargs):
     colorbar_ax=kwargs['cax']
     clim=kwargs['ticks']
     
-    fig_flag.colorbar(mesh,**kwargs)
-    colorbar_ax.get_yaxis().set_ticklabels(['0','%.4f'%clim[1]])
+    cb=fig_flag.colorbar(mesh,**kwargs)
+    colorbar_ax.get_yaxis().set_ticklabels(['0','%.3f'%clim[1]])
     labels=colorbar_ax.yaxis.get_ticklabels()
         
 
         #labels[0]='0'
         #labels[1]=
     for l in colorbar_ax.yaxis.get_ticklabels():
-        l.set_fontsize(6)
-
+        l.set_fontsize(4)
+    colorbar_ax.tick_params(axis='both', which='both',length=0)
     colorbar_ax.spines['top'].set_color('none')
     colorbar_ax.spines['bottom'].set_color('none')
     colorbar_ax.spines['left'].set_color('none')
     colorbar_ax.spines['right'].set_color('none')
-    colorbar_ax.set_ylabel("probability",fontsize=6)
-    colorbar_ax.yaxis.labelpad= AXISPAD   
+    colorbar_ax.set_ylabel("probability",fontsize=4)
+    colorbar_ax.yaxis.labelpad= -17  
+    colorbar_ax.tick_params(axis='both', which='major', pad=0)
+    cb.outline.set_edgecolor('0.5')
+    cb.outline.set_linewidth(0.5)
 
         #formatter = FuncFormatter(my_formatter)
 
@@ -595,7 +611,7 @@ def adjust_polar_ax(ax,plot_power_value,sub_flag,**kwargs):
     if plot_power_value:
         ax.set_ylim([1,5.5])
     else:
-        ax.set_ylim([0,1])
+        ax.set_ylim([0,1.1])
     #ax.get_yaxis().set_ticks([])
     if not sub_flag:
         thetaticks=[0,np.pi/2,np.pi,3*np.pi/2]
@@ -603,11 +619,18 @@ def adjust_polar_ax(ax,plot_power_value,sub_flag,**kwargs):
         
 
         thetalabels=['270$^\circ$','0$^\circ$','90$^\circ$','180$^\circ$']
+
         ax.get_xaxis().set_ticklabels(thetalabels)
         #ax.set_thetagrids(thetaticks, frac=1.3)
 
         ax.get_yaxis().set_ticks([])
         ax.get_yaxis().set_ticklabels([])
+        fpl.adjust_spines(ax,[])
+        havl=['center','center','left','center']
+        rpositions=[1.36,1.1,1.45,1.26]
+        for ind,crlabel in enumerate(thetalabels):
+            #pdb.set_trace()
+            ax.text(thetaticks[ind],rpositions[ind],crlabel,fontsize=6,ha=havl[ind])
     else:
         fpl.adjust_spines(ax,['left','bottom'])
         ax.get_xaxis().set_ticks([np.pi/2,np.pi/2+np.pi/4,np.pi])
@@ -1113,6 +1136,10 @@ def plot_hist(axh,indata,**kwargs):
         #    axh.text(xvls[crind],0.2,str(kwargs['plot_frac'][crind])[0:4],fontsize=7)
 
 def polar_circle(ax,thetavls,rvls,**kwargs):
+    try:
+        linewidth=kwargs['linewidth']
+    except:
+        linewidth=1
 
     xvls=np.linspace(thetavls[0],thetavls[1],50)
     try:
@@ -1121,7 +1148,7 @@ def polar_circle(ax,thetavls,rvls,**kwargs):
         pdb.set_trace()
     crcol=kwargs['color']
     
-    ax.plot(xvls,rvls,crcol)
+    ax.plot(xvls,rvls,crcol,linewidth=linewidth)
 
 
 def plot_transects(ax,ave_heatmap_data,**kwargs):
@@ -1269,27 +1296,33 @@ def determine_and_plot_transects(ax,bnds,crdt,redges,theta,**kwargs):
 
         position=[1.1,.01+.005*crind]
         strvl=legend_text[crind]
-        if not no_legend:
-            plot_legend(ax,position,colvls[crind], strvl)
+        #if not no_legend:
+         #   plot_legend(ax,position,colvls[crind], strvl)
         
      
                 
     fpl.adjust_spines(ax,['left','bottom'])
-    ax.get_xaxis().set_ticks([0,0.5,1.0])
-    ax.get_xaxis().set_ticklabels([0,0.5,1.0],fontsize=6)
-    ax.set_xlabel('local vector strength', fontsize=6)
-    ax.yaxis.labelpad= 1
-    ax.xaxis.labelpad=1 
-    ax.set_ylabel('probability',fontsize=6)
-    
-    ax.set_xlim([0,1.05])
+    ax.get_xaxis().set_ticks([0,1.0])
+    ax.get_xaxis().set_ticklabels([0,1.0],fontsize=5)
+    ax.get_yaxis().set_ticks([0,.03])
+    ax.get_yaxis().set_ticklabels([0,.03],fontsize=5)
+    ax.set_xlabel('local vector \nstrength', fontsize=5)
+    #ax.yaxis.labelpad=-2
+    ax.xaxis.labelpad=0
+    ax.set_ylabel('probability',fontsize=5)
+    ax.yaxis.labelpad=-12
+    ax.xaxis.labelpad=0
+    ax.tick_params(direction='out', pad=1)
+    #mpl.rcParams['xtick.major.size'] = 10
+    #mpl.rcParams['xtick.major.width'] = 1
+    ax.set_xlim([0,1.1])
     
 
     #ax.set_ylim([0,.05])
     
 
-    ax.set_aspect(40)
-    ax.set_ylim([0,ymax])
-    ax.get_yaxis().set_ticks(np.arange(0,ymax,0.01))
-    ax.get_yaxis().set_ticklabels(np.arange(0,ymax,0.01),fontsize=6)
+    #ax.set_aspect(40)
+    ax.set_ylim([0,.03])
+    #ax.get_yaxis().set_ticks(np.arange(0,ymax,0.01))
+    #ax.get_yaxis().set_ticklabels(np.arange(0,ymax,0.01),fontsize=6)
     

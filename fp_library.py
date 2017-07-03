@@ -68,7 +68,7 @@ def adjust_spines(ax,spines, spine_locations={}, smart_bounds=True, xticks=None,
     if yticks is None:
         yticks = ax.get_yticks()
         
-    spine_locations_dict = {'top': 10, 'right': 10, 'left': 10, 'bottom': 10}
+    spine_locations_dict = {'top': 0, 'right': 0, 'left': 0, 'bottom': 0}
     for key in spine_locations.keys():
         spine_locations_dict[key] = spine_locations[key]
         
@@ -121,7 +121,8 @@ def adjust_spines(ax,spines, spine_locations={}, smart_bounds=True, xticks=None,
     for line in ax.get_xticklines() + ax.get_yticklines():
         #line.set_markersize(6)
         line.set_markeredgewidth(1)
-                
+    ax.tick_params(direction='out')
+    ax.tick_params(axis='both', which='major', pad=1)            
 ###################################################################################################
 # Map to Color
 ###################################################################################################
