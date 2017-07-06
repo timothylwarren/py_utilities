@@ -268,7 +268,7 @@ def get_dynamic_vec_strength(mot_dt,time_dt,calculation_type,vec_calc_type,filte
     sample_rate=datalen/total_time
     filter_len_in_pts=filter_len_in_sec*sample_rate
     gaussian_wts=make_gaussian_weights(filter_len_in_pts,normalize_type='sum')
-    
+    pdb.set_trace()
     
     if calculation_type is 'convolution':
             #for variance, first perform convolution

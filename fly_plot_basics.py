@@ -235,7 +235,7 @@ def plot_motor(indt,ax,**kwargs):
     else:
         mot=mot_tmp
     
-    sub_plot_motor(ax,time,mot,save_dt_flag=save_dt_flag)
+    sub_plot_motor(ax,time,mot,save_dt_flag=save_dt_flag, **kwargs)
     
    
     if mnvl:
@@ -322,6 +322,12 @@ def sub_plot_motor(ax,time,mot,**kwargs):
         plot_flag=kwargs['plot_flag']
     except:
         plot_flag=True
+
+    try:
+        col=kwargs['color']
+    except:
+        col='b'
+    
     absolute_diff_vls=abs(np.diff(mot))
     #these are indices to split the incoming array because the difference between neighboring
     #values exceeds threshold
@@ -337,7 +343,7 @@ def sub_plot_motor(ax,time,mot,**kwargs):
         for crind,crmot_splitinds in enumerate(mot_split_array):
             if np.size(crmot_splitinds):
                 
-                ax.plot(time_split_array[crind],crmot_splitinds,'b')
+                ax.plot(time_split_array[crind],crmot_splitinds,color=col)
             
     return time_split_array, mot_split_array
 

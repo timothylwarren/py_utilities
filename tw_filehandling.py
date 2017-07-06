@@ -27,7 +27,7 @@ def change_pickle(pickle_fname,param_name,new_param_value):
     params=open_pickle(pickle_fname)
     
     params[param_name]=new_param_value
-    pdb.set_trace()
+    
 
     save_to_pickle(pickle_fname,params)
 
