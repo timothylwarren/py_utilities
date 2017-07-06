@@ -483,6 +483,10 @@ def polar_heat_map(ax,heat_data,**kwargs):
     else:
         plot_power_value=False
    
+    try:
+        offset_vl=kwargs['offset_vl']
+    except:
+        offset_vl=np.pi/2
     # if 'theta' in kwargs:
     #     theta=kwargs['theta']
     # else:
@@ -504,7 +508,7 @@ def polar_heat_map(ax,heat_data,**kwargs):
     
     
     if shift_vertical_flag:
-        thetamod=thetamod+np.pi/2
+        thetamod=thetamod+offset_vl
     
     
     if calc_clim_flag:
@@ -532,7 +536,7 @@ def polar_heat_map(ax,heat_data,**kwargs):
         for crind,crarcpair in enumerate(arc_positions):
             #rvl=kwargs['plot_r_bnpds']
             polar_circle(ax,crarcpair,arc_r_pos,color=arc_colors[crind],linewidth=2)
-        pdb.set_trace()
+        
         polar_circle(ax,[0,2*np.pi-.0001],1,color='0.5',linewidth=0.5) 
    
     if colorbar_flag:
@@ -1178,10 +1182,7 @@ def plot_transects(ax,ave_heatmap_data,**kwargs):
     else:
         theta=ave_heatmap_data['theta']
 
-    try:
-        number_of_sectors=kwargs['num_of_sectors']
-    except:
-        number_of_sectors=6
+    
 
     try:
         sector_rvl=kwargs['sector_rvl']
@@ -1251,7 +1252,7 @@ def determine_and_plot_transects(ax,bnds,crdt,redges,theta,**kwargs):
         no_legend=kwargs['no_legend']
     except:
         no_legend=False
-
+    
     for crbnd in bnds:
 
 
