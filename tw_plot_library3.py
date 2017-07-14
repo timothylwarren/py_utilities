@@ -95,7 +95,7 @@ def plot_wing(ax,timevls,mot):
                 ax.plot(timevls[crsplitinds],mot[crsplitinds],'b')
             except:
                 pdb.set_trace()
-def scatterplot(ax,xvl,yvl,**kwargs):
+def scatterplot(ax,xvl,yvl,sizefactor=0.3,**kwargs):
     try:
         ellipse_flag=kwargs['ellipse_flag']
     except:
@@ -105,7 +105,10 @@ def scatterplot(ax,xvl,yvl,**kwargs):
         plot_error_bar=kwargs['plot_error_bar']
     except:
         plot_error_bar=False
-
+    try:
+        set_axes=kwargs['set_axes']
+    except:
+        set_axes=False
 
     try:
         error_scale_factor=kwargs['error_scale_factor']
@@ -118,7 +121,7 @@ def scatterplot(ax,xvl,yvl,**kwargs):
         long_ax=kwargs['long_ax']
     except:
         long_ax=False
-    sizefactor=10.
+    #sizefactor=10.
     facecolor_vl=0.4
     colorvals=cm.get_cmap('gray')
     try:
@@ -138,10 +141,7 @@ def scatterplot(ax,xvl,yvl,**kwargs):
         title=kwargs['title']
     except:
         title=False
-    try:
-        sizefactor=kwargs['sizefactor']
-    except:
-        sizefactor=3
+    
 
     if dynamic_sizes:
        
@@ -168,22 +168,28 @@ def scatterplot(ax,xvl,yvl,**kwargs):
                 modify_ells(ax,ells,mnvl)
 
     else:
-        
-        ax.scatter(np.array(xvl), np.array(yvl),  facecolors='none', edgecolors='k',s=sizefactor,alpha=0.5,marker='o')
+        #ax.scatter(arena_stats['ommatidiaAzimuths']*180/np.pi,arena_stats['ommatidiaElevations']*180/np.pi,color='k',s=0.3)
+       
+        ax.scatter(np.array(xvl), np.array(yvl),  edgecolor='k',facecolor='k',s=sizefactor,alpha=0.5,clip_on=False)
         #pdb.set_trace()
-        ax.scatter(np.array(xvl)+180, np.array(yvl), facecolors='none', edgecolors='k', s=sizefactor,alpha=0.5,marker='o')
+        if double_horizontal_ax:
+            ax.scatter(np.array(xvl)+180, np.array(yvl), edgecolor='k',facecolor='k', s=sizefactor,alpha=0.5,clip_on=False)
         
         if plot_error_bar:
             ax.errorbar(x=np.array(xvl),y=np.array(yvl),yerr=ydyn*error_scale_factor,xerr=xdyn*error_scale_factor,fmt=None, ecolor=[0.6,0.6,0.6], alpha=0.5,capsize=0, zorder=5)
 
             ax.errorbar(x=np.array(xvl)+180,y=np.array(yvl),yerr=ydyn*error_scale_factor,xerr=xdyn*error_scale_factor,fmt=None, alpha=0.5,ecolor=[.6, .6, .6], capsize=0, zorder=5)
-    if long_ax:
-        ax.set_xlim(6, 21)
-        ax.set_ylim(0, 190)
-    else:
-        ax.set_aspect('equal')
-        ax.set_xlim(-10, 370)
-        ax.set_ylim(0, 190)
+    if set_axes:
+        if long_ax:
+            ax.set_xlim(6, 21)
+            ax.set_ylim(0, 180)
+        else:
+            #ax.set_aspect('equal')
+            if double_horizontal_ax:
+                ax.set_xlim(0, 360)
+            else:
+                ax.set_xlim(0, 180)
+            ax.set_ylim(0, 180)
 
     if title:
         ax.set_title(title)
@@ -253,6 +259,23 @@ def lolli_plot(ax,head_dt,vec_dt,**kwargs):
         head_dt=head_dt+np.pi/2
 
     
+    for crind,crhead in enumerate(head_dt):
+        #if shift_vertical:
+         #   crhead=crhead+np.pi/2
+        #ax[0].plot(np.hstack([head_dt, head_dt]),np.hstack((np.zeros(len(vec_dt)), vec_dt)))
+        if 'plot_both_vec' in kwargs:
+            
+            ax.plot([crhead,crhead],[0,vec_dt[crind,0]/2.],'k',linewidth=0.2)
+            ax.plot([crhead,crhead],[vec_dt[crind,0]/2.,vec_dt[crind,0]/2+vec_dt[crind,1]/2.],'r',linewidth=0.2)
+        else:
+            ax.plot([crhead,crhead],[0,vec_dt[crind]],'k',linewidth=0.2)
+            if thresh_ind_flag:
+                if np.in1d(crind,thresh_inds)[0]:
+                
+                    ax.plot([crhead,crhead],[0,vec_dt[crind]],'r')
+
+
+
     if plot_points:
         
         
@@ -278,20 +301,7 @@ def lolli_plot(ax,head_dt,vec_dt,**kwargs):
         else:
             ax.scatter(head_dt,vec_dt,c='c',s=3,alpha=0.5,edgecolor='none')
     #plot_vec
-    for crind,crhead in enumerate(head_dt):
-        #if shift_vertical:
-         #   crhead=crhead+np.pi/2
-        #ax[0].plot(np.hstack([head_dt, head_dt]),np.hstack((np.zeros(len(vec_dt)), vec_dt)))
-        if 'plot_both_vec' in kwargs:
-            
-            ax.plot([crhead,crhead],[0,vec_dt[crind,0]/2.],'k',linewidth=0.2)
-            ax.plot([crhead,crhead],[vec_dt[crind,0]/2.,vec_dt[crind,0]/2+vec_dt[crind,1]/2.],'r',linewidth=0.2)
-        else:
-            ax.plot([crhead,crhead],[0,vec_dt[crind]],'k',linewidth=0.2)
-            if thresh_ind_flag:
-                if np.in1d(crind,thresh_inds)[0]:
-                
-                    ax.plot([crhead,crhead],[0,vec_dt[crind]],'r')
+   
 
     
     #for tick in ax.xaxis.get_major_ticks():
@@ -300,12 +310,12 @@ def lolli_plot(ax,head_dt,vec_dt,**kwargs):
      #   tick.label1.set_fontsize(8)
         #axh.fill(crdt['xrad'][0:-1]+crdt['rad_per_bin']/2,crdt['normhst'],colvls[i],edgecolor=colvls[i],alpha=0.5,linewidth=1)
     #ax.get_yaxis().set_ticks([0.25,0.5])
-    if shift_vertical:
-        ax.get_xaxis().set_ticks([0,np.pi/2,np.pi,3*np.pi/2])
-        ax.get_xaxis().set_ticklabels(['270','0','90','180'])
-    else:
-        ax.get_xaxis().set_ticks([0,np.pi/2,np.pi,3*np.pi/2])
-        ax.get_xaxis().set_ticklabels(['0$^\circ$','90$^\circ$','180$^\circ$', '270$^\circ$'])
+    #if shift_vertical:
+     #   ax.get_xaxis().set_ticks([0,np.pi/2,np.pi,3*np.pi/2])
+      #  ax.get_xaxis().set_ticklabels(['270','0','90','180'])
+    #else:
+     #   ax.get_xaxis().set_ticks([0,np.pi/2,np.pi,3*np.pi/2])
+      #  ax.get_xaxis().set_ticklabels(['0$^\circ$','90$^\circ$','180$^\circ$', '270$^\circ$'])
     #h.set_ylim([0,MAXYVL])
    
     ax.text(0,1.5,'n=%d'%(len(head_dt)),fontsize=6)
@@ -432,10 +442,11 @@ def polar_heat_map(ax,heat_data,**kwargs):
         arc_colors=kwargs['arc_colors']
         plot_arc_flag=True
     except:
-        pdb.set_trace()
+        
         plot_arc_flag=False
     try:
         sub_flag=kwargs['sub_flag']
+        
     except:
         sub_flag=False
     try:
@@ -538,7 +549,11 @@ def polar_heat_map(ax,heat_data,**kwargs):
             polar_circle(ax,crarcpair,arc_r_pos,color=arc_colors[crind],linewidth=2)
         
         polar_circle(ax,[0,2*np.pi-.0001],1,color='0.5',linewidth=0.5) 
-   
+    else:
+        max_bnd=1
+        #rpositions=[1.36,1.1,1.45,1.26]
+        rpositions=[1.26,1.03,1.35,1.16]
+        polar_circle(ax,[0,2*np.pi-.0001],1,color='0.5',linewidth=0.5) 
     if colorbar_flag:
         
         cmap=pylab.get_cmap('hot')
@@ -549,10 +564,12 @@ def polar_heat_map(ax,heat_data,**kwargs):
 
     if type(ax) is list:
         for inds in [0,1]:
-            adjust_polar_ax(ax[inds],plot_power_value,sub_flag)
+            adjust_polar_ax(ax[inds],plot_power_value,sub_flag,**kwargs)
     else:
-        adjust_polar_ax(ax,plot_power_value,sub_flag) 
-
+        if plot_arc_flag:
+            adjust_polar_ax(ax,plot_power_value,**kwargs) 
+        else:
+            adjust_polar_ax(ax,plot_power_value,rpositions=rpositions,max_bnd=max_bnd,**kwargs)
 
 
 def make_colorbar(fig_flag,mesh,**kwargs):
@@ -561,24 +578,27 @@ def make_colorbar(fig_flag,mesh,**kwargs):
     colorbar_ax=kwargs['cax']
     clim=kwargs['ticks']
     
-    cb=fig_flag.colorbar(mesh,**kwargs)
-    colorbar_ax.get_yaxis().set_ticklabels(['0','%.3f'%clim[1]])
-    labels=colorbar_ax.yaxis.get_ticklabels()
+    cb=fig_flag.colorbar(mesh,orientation='horizontal',**kwargs)
+    colorbar_ax.get_xaxis().set_ticklabels(['0','%.3f'%clim[1]])
+    #labels=colorbar_ax.xaxis.get_ticklabels()
         
 
         #labels[0]='0'
         #labels[1]=
-    for l in colorbar_ax.yaxis.get_ticklabels():
+    for l in colorbar_ax.xaxis.get_ticklabels():
         l.set_fontsize(4)
     colorbar_ax.tick_params(axis='both', which='both',length=0)
     colorbar_ax.spines['top'].set_color('none')
     colorbar_ax.spines['bottom'].set_color('none')
     colorbar_ax.spines['left'].set_color('none')
     colorbar_ax.spines['right'].set_color('none')
-    colorbar_ax.set_ylabel("probability",fontsize=4)
-    colorbar_ax.yaxis.labelpad= -17  
+    colorbar_ax.set_xlabel("occupance probability",fontsize=4)
+    colorbar_ax.xaxis.labelpad= -1 
     colorbar_ax.tick_params(axis='both', which='major', pad=0)
-    cb.outline.set_edgecolor('0.5')
+    try:
+        cb.outline.set_color('0.5')
+    except:
+        pdb.set_trace()
     cb.outline.set_linewidth(0.5)
 
         #formatter = FuncFormatter(my_formatter)
@@ -606,7 +626,7 @@ def make_colorbar(fig_flag,mesh,**kwargs):
             #ax.pcolormesh(rvl,theta,heat_data[dat_type][ind],cmap='hot',vmin=clim[0],vmax=clim[1])
 
    
-def adjust_polar_ax(ax,plot_power_value,sub_flag,**kwargs):       
+def adjust_polar_ax(ax,plot_power_value,withhold_vert_axis=False,withhold_horiz_axis=False,split_y_label=False,max_bnd=1.1,rpositions=[1.36,1.1,1.45,1.26],sub_flag=False,**kwargs):       
     
     if 'plot_mean' in kwargs:
         
@@ -615,7 +635,7 @@ def adjust_polar_ax(ax,plot_power_value,sub_flag,**kwargs):
     if plot_power_value:
         ax.set_ylim([1,5.5])
     else:
-        ax.set_ylim([0,1.1])
+        ax.set_ylim([0,max_bnd])
     #ax.get_yaxis().set_ticks([])
     if not sub_flag:
         thetaticks=[0,np.pi/2,np.pi,3*np.pi/2]
@@ -631,33 +651,55 @@ def adjust_polar_ax(ax,plot_power_value,sub_flag,**kwargs):
         ax.get_yaxis().set_ticklabels([])
         fpl.adjust_spines(ax,[])
         havl=['center','center','left','center']
-        rpositions=[1.36,1.1,1.45,1.26]
+        #rpositions=[1.36,1.1,1.45,1.26]
         for ind,crlabel in enumerate(thetalabels):
             #pdb.set_trace()
             ax.text(thetaticks[ind],rpositions[ind],crlabel,fontsize=6,ha=havl[ind])
     else:
+        
         fpl.adjust_spines(ax,['left','bottom'])
-        ax.get_xaxis().set_ticks([np.pi/2,np.pi/2+np.pi/4,np.pi])
-        ax.get_xaxis().set_ticklabels(['0$^\circ$','45$^\circ$','90$^\circ$'],fontsize=6)
+        
+        if withhold_vert_axis and withhold_horiz_axis:
+            fpl.adjust_spines(ax,[])
+            #ax.set_yticks([0,1])
+            #ax.set_yticklabels([0,1],fontsize=5)
+        #ax.get_xaxis().set_ticks([np.pi/2,np.pi/2+np.pi/4,np.pi])
+        #ax.get_xaxis().set_ticklabels(['0$^\circ$','45$^\circ$','90$^\circ$'],fontsize=6)
+        #ax.set_xlim([np.pi/2,np.pi])
+        #ax.set_ylim([0,1])
+        #ax.get_yaxis().set_ticks([0,0.2,0.4,0.6,0.8,1.0])
+        #ax.get_yaxis().set_ticklabels(['0','0.2','0.4','0.6','0.8','1.0'],fontsize=6)
+        else:
+            if split_y_label:
+                ax.set_ylabel('local\nvector strength',fontsize=5,multialignment='center')
+            else: 
+                ax.set_ylabel('local vector strength',fontsize=5)
+            ax.set_xlabel('heading',fontsize=5)
+            ax.set_yticks([0,1])
+            ax.set_yticklabels([0,1],fontsize=5)
+            ax.get_xaxis().set_ticks([np.pi/2,np.pi])
+            ax.set_xticklabels([0,90],fontsize=5)
+            for tick in ax.yaxis.get_major_ticks():
+                tick.label1.set_fontsize(5)
+            for tick in ax.xaxis.get_major_ticks():
+                tick.label1.set_fontsize(5)
+        ax.set_ylim([0,1])
+        
+        ax.yaxis.labelpad=0
+        
         ax.set_xlim([np.pi/2,np.pi])
-        ax.get_yaxis().set_ticks([0,0.2,0.4,0.6,0.8,1.0])
-        ax.get_yaxis().set_ticklabels(['0','0.2','0.4','0.6','0.8','1.0'],fontsize=6)
-        ax.set_ylabel('local vector strength',fontsize=6)
-        ax.set_xlabel('polarizer position',fontsize=6)
-    for tick in ax.xaxis.get_major_ticks():
-            tick.label1.set_fontsize(6)
+        
+        
+        
 
-    for tick in ax.yaxis.get_major_ticks():
-            tick.label1.set_fontsize(6)
-    #ax.grid()
+        
+        
+        
+        ax.xaxis.labelpad=-4
     
-    #ax.set_rgrids(np.power(plot_power_value,(theta[0,:])),angle=345., fontsize=2)
-    
-    
-    #ax.thetagrids([theta * 15 for theta in range(360//15)])
-    #len(rvl[1,:])
-    #ax.rgrids(np.linspace(np.min(rvl),np.max(rvl),20))
 
+   
+    
 
 
 
@@ -958,13 +1000,14 @@ def plot_sigmoid_compar(ax,wd,crmot,coeff,asy_vel):
      for tick in ax.yaxis.get_major_ticks():
         tick.label1.set_fontsize(8)     
 
-def add_mean_and_range(ax,mn,range,mn_height,range_height,**kwargs):
+def add_mean_and_range(ax,mn,range,mn_height,range_height,plot_range=False,**kwargs):
     try:
         col=kwargs['color']
     except:
         col='r'
-    ax.plot(mn,mn_height,color=col,marker='v',markersize=2)
-    ax.plot([range[0],range[1]],[range_height,range_height],color=col)
+    ax.plot(mn,mn_height,color=col,marker='v',markersize=3,clip_on=False)
+    if plot_range:
+        ax.plot([range[0],range[1]],[range_height,range_height],color=col)
 
 def plot_hist(axh,indata,**kwargs):
    
@@ -1293,7 +1336,7 @@ def determine_and_plot_transects(ax,bnds,crdt,redges,theta,**kwargs):
             tst=1
         
        
-        ax.step(xvlsplt[:-1],yplt[:-1],color=colvls[crind])
+        ax.step(xvlsplt[:-1],yplt[:-1],color=colvls[crind],linewidth=0.5)
 
         position=[1.1,.01+.005*crind]
         strvl=legend_text[crind]
@@ -1304,19 +1347,19 @@ def determine_and_plot_transects(ax,bnds,crdt,redges,theta,**kwargs):
                 
     fpl.adjust_spines(ax,['left','bottom'])
     ax.get_xaxis().set_ticks([0,1.0])
-    ax.get_xaxis().set_ticklabels([0,1.0],fontsize=5)
+    ax.get_xaxis().set_ticklabels([0,1],fontsize=5)
     ax.get_yaxis().set_ticks([0,.03])
     ax.get_yaxis().set_ticklabels([0,.03],fontsize=5)
-    ax.set_xlabel('local vector \nstrength', fontsize=5)
+    ax.set_xlabel('local\nvector strength', fontsize=5,multialignment='center')
     #ax.yaxis.labelpad=-2
     ax.xaxis.labelpad=0
     ax.set_ylabel('probability',fontsize=5)
-    ax.yaxis.labelpad=-12
+    ax.yaxis.labelpad=-9
     ax.xaxis.labelpad=0
-    ax.tick_params(direction='out', pad=1)
+    #ax.tick_params(direction='out', pad=1)
     #mpl.rcParams['xtick.major.size'] = 10
     #mpl.rcParams['xtick.major.width'] = 1
-    ax.set_xlim([0,1.1])
+    ax.set_xlim([0,1])
     
 
     #ax.set_ylim([0,.05])

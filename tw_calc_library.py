@@ -268,7 +268,7 @@ def get_dynamic_vec_strength(mot_dt,time_dt,calculation_type,vec_calc_type,filte
     sample_rate=datalen/total_time
     filter_len_in_pts=filter_len_in_sec*sample_rate
     gaussian_wts=make_gaussian_weights(filter_len_in_pts,normalize_type='sum')
-    pdb.set_trace()
+    
     
     if calculation_type is 'convolution':
             #for variance, first perform convolution
@@ -410,7 +410,7 @@ def linear_to_polar(input_pos):
             output_pos['theta'].append(np.arctan2(input_pos['y'][crind],input_pos['x'][crind]))
             output_pos['len'].append(np.sqrt(input_pos['x'][crind]**2+input_pos['y'][crind]**2))
     else:    
-        pdb.set_trace()
+        
         output_pos['theta']=np.arctan2(input_pos['y'],input_pos['x'])
         output_pos['len']=np.sqrt(input_pos['x']**2+input_pos['y']**2)
     return output_pos
@@ -440,10 +440,28 @@ def entropy(normhst):
     return entropyvl
 
     #assumes list of lists or list of arrays as input
+
+#assumes input in radians
+def force_angle_to_range(input_angle,**kwargs):
+    try:
+        force_range=kwargs['force_range']
+    except:
+        force_range='0_pi'
+    if force_range is '0_pi':
+        mod_angle=input_angle
+        posinds=np.where(input_angle>0)[0]
+        mod_angle[posinds]=np.mod(input_angle,np.pi)
+        neginds=np.where(mod_angle<0)[0]
+        mod_angle[neginds]=np.mod(input_angle,-np.pi)
+        mod_angle=abs(mod_angle)
+        
+
+    return mod_angle
+
 def get_2darray(input_dt):
     numrow=len(input_dt)
     numcol=len(input_dt[0])
-    pdb.set_trace()
+    
     output_array=np.zeros((numrow,numcol))
     for ind,cr_row in enumerate(input_dt):
         output_array[ind]=cr_row
@@ -511,21 +529,6 @@ def circ_mean(vls,**kwargs):
     return rad_to_deg(mnout),tmpvar
 
 
-# #multiply
-# def weighted_hist_mean(counts,edges):
-
-#     bin_middles = (edges[:-1] + edges[1:]) / 2
-
-
-#     crweights = np.arange(len(counts))+1
-
-#     weighted_average = np.average(counts, weights=bin_middles)
-
-#     scaled_weighted_average=weighted_average*np
-    
-#     return weighted_average
-
-
 
 
 
@@ -542,7 +545,7 @@ def weighted_mean(mnvls,edges,**kwargs):
         anal_180_flag=kwargs['anal_180']
     except:
         anal_180_flag=False
-
+    
     bin_middles = (edges[:-1] + edges[1:]) / 2
 
     if len(bin_middles)<len(mnvls):

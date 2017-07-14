@@ -5,8 +5,8 @@
 # general imports
 import matplotlib
 print matplotlib.__version__
-print 'recommended version: 1.1.1 or greater'
-
+#print 'recommended version: 1.1.1 or greater'
+import pdb
 
 ###################################################################################################
 
@@ -58,7 +58,7 @@ from matplotlib.collections import PatchCollection
 
 # NOTE: smart_bounds is disabled (commented out) in this function. It only works in matplotlib v >1.
 # to fix this issue, try manually setting your tick marks (see example below)
-def adjust_spines(ax,spines, spine_locations={}, smart_bounds=True, xticks=None, yticks=None):
+def adjust_spines(ax,spines, spine_locations={}, smart_bounds=True, xticks=None, yticks=None,xbnds=None,ybnds=None):
     if type(spines) is not list:
         spines = [spines]
         
@@ -68,10 +68,10 @@ def adjust_spines(ax,spines, spine_locations={}, smart_bounds=True, xticks=None,
     if yticks is None:
         yticks = ax.get_yticks()
         
-    spine_locations_dict = {'top': 0, 'right': 0, 'left': 0, 'bottom': 0}
+    spine_locations_dict = {'top': 0, 'right': 0, 'left': 5, 'bottom': 5}
     for key in spine_locations.keys():
         spine_locations_dict[key] = spine_locations[key]
-        
+      
     if 'none' in spines:
         for loc, spine in ax.spines.iteritems():
             spine.set_color('none') # don't draw spine
@@ -83,6 +83,7 @@ def adjust_spines(ax,spines, spine_locations={}, smart_bounds=True, xticks=None,
         if loc in spines:
             spine.set_position(('outward',spine_locations_dict[loc])) # outward by x points
             spine.set_color('black')
+            spine.set_linewidth(0.5)
         else:
             spine.set_color('none') # don't draw spine
             
@@ -121,8 +122,21 @@ def adjust_spines(ax,spines, spine_locations={}, smart_bounds=True, xticks=None,
     for line in ax.get_xticklines() + ax.get_yticklines():
         #line.set_markersize(6)
         line.set_markeredgewidth(1)
-    ax.tick_params(direction='out')
-    ax.tick_params(axis='both', which='major', pad=1)            
+    ax.tick_params(direction='in')
+    ax.tick_params(axis='both', which='major',width=0.5, length=2)
+    ax.tick_params(axis='both', which='major', pad=1) 
+    
+    
+    if xbnds:
+        ax.set_xlim(xbnds)
+        ax.set_xticks(xbnds)
+        ax.set_xticklabels(xbnds,fontsize=6)
+    if ybnds:
+        ax.set_ylim(ybnds)
+        ax.set_yticks(ybnds)
+        ax.set_yticklabels(ybnds,fontsize=6)
+
+
 ###################################################################################################
 # Map to Color
 ###################################################################################################

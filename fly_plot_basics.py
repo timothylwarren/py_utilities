@@ -136,10 +136,7 @@ def pad_vector_lists(indt):
 
 
 def plot_motor(indt,ax,**kwargs):
-    try: 
-        save_dt_flag=kwargs['save_dt_flag']
-    except:
-        save_dt_flag=False
+    
     VERTVL=370
     if 'zoom_times' in kwargs:
         type='zoom'
@@ -235,7 +232,7 @@ def plot_motor(indt,ax,**kwargs):
     else:
         mot=mot_tmp
     
-    sub_plot_motor(ax,time,mot,save_dt_flag=save_dt_flag, **kwargs)
+    sub_plot_motor(ax,time,mot, **kwargs)
     
    
     if mnvl:
@@ -276,15 +273,15 @@ def plot_motor(indt,ax,**kwargs):
         fpl.adjust_spines(ax,['left','bottom'])
     if plot_left_axis:
         ax.get_yaxis().set_ticks([0,90,180,270,360])
-        ax.get_yaxis().set_ticklabels(['0$^\circ$','90$^\circ$','180$^\circ$','270$^\circ$','360$^\circ$'],fontsize=6)
+        ax.get_yaxis().set_ticklabels(['0','9','180','270','360'],fontsize=6)
         ax.set_ylabel('polarizer', fontsize=6)
     
     if xtickflag:
         xticks=kwargs['xticks']
         xticklabels=kwargs['xticklabels']
     else:
-        xticks=np.linspace(0,25,6)
-        xticklabels=['0','5','10','15','20','25']
+        xticks=[0,15]
+        xticklabels=['0','15']
        
     if plot_vert_flag:
         ax.plot([kwargs['plot_vertical'],kwargs['plot_vertical']],[-20,380],'r')
@@ -302,8 +299,8 @@ def plot_motor(indt,ax,**kwargs):
     ax.set_xlim(xlim)
     #ax.set_aspect(0.005)
     ax.xaxis.labelpad = AXISPAD
-    ax.yaxis.labelpad= AXISPAD
-    ax.set_ylim([-20,380])
+    ax.yaxis.labelpad= -2
+    ax.set_ylim([0,360])
 
 ##
 #This function plots position values in a manner that removes artefactual lines from data wrapping around
@@ -326,7 +323,7 @@ def sub_plot_motor(ax,time,mot,**kwargs):
     try:
         col=kwargs['color']
     except:
-        col='b'
+        col='k'
     
     absolute_diff_vls=abs(np.diff(mot))
     #these are indices to split the incoming array because the difference between neighboring
@@ -343,7 +340,7 @@ def sub_plot_motor(ax,time,mot,**kwargs):
         for crind,crmot_splitinds in enumerate(mot_split_array):
             if np.size(crmot_splitinds):
                 
-                ax.plot(time_split_array[crind],crmot_splitinds,color=col)
+                ax.plot(time_split_array[crind],crmot_splitinds,color=col,linewidth=0.5)
             
     return time_split_array, mot_split_array
 
@@ -360,10 +357,9 @@ def plot_mot_hist(indt,crax,**kwargs):
     crax.plot(0.22,indt['mnrad_360'],'r<')
     crax.set_xlim([0,0.24])
 
-def make_heat_map(heatdt,**kwargs):
+def make_heat_map(ax,heatdt,**kwargs):
     POWER_VALUE=5
    
-    ax=kwargs['ax']
     plt_type=kwargs['plt_type']
     try:
         transect_ax=kwargs['transect_ax']
@@ -410,9 +406,9 @@ def make_heat_map(heatdt,**kwargs):
             cr_heatmap_data['norm_heat_map_vls']=cr_heatmap_data['norm_heat_map_vls']/sum(sum(cr_heatmap_data['norm_heat_map_vls']))
 
         if plot_colorbar_flag:
-            plt.polar_heat_map(ax,cr_heatmap_data,shift_vertical_flag=True,aligned=aligned_flag,sub_flag=sub_flag,colorbar_ax=colorbar_ax,fig_flag=kwargs['fig_flag'])
+            plt.polar_heat_map(ax,cr_heatmap_data,shift_vertical_flag=True,sub_flag=sub_flag,**kwargs)
         else:
-            plt.polar_heat_map(ax,cr_heatmap_data,shift_vertical_flag=True,aligned=aligned_flag,sub_flag=sub_flag)
+            plt.polar_heat_map(ax,cr_heatmap_data,shift_vertical_flag=True,sub_flag=sub_flag,**kwargs)
 
     elif paired_flag:
         
@@ -423,19 +419,22 @@ def make_heat_map(heatdt,**kwargs):
             
         cr_heatmap_data=heatmap_list
         if plot_colorbar_flag:
-            plt.polar_heat_map(ax,heatmap_list,shift_vertical_flag=True,aligned=aligned_flag,sub_flag=sub_flag,paired_flag=True,sep_max_flag=True,colorbar_ax=colorbar_ax,fig_flag=kwargs['fig_flag'])
+            plt.polar_heat_map(ax,heatmap_list,shift_vertical_flag=True,aligned=aligned_flag,sub_flag=sub_flag,paired_flag=True,sep_max_flag=True,colorbar_ax=colorbar_ax,**kwargs)
         else:
-            plt.polar_heat_map(ax,heatmap_list,shift_vertical_flag=True,aligned=aligned_flag,sub_flag=sub_flag,paired_flag=True,sep_max_flag=True)
+            plt.polar_heat_map(ax,heatmap_list,shift_vertical_flag=True,aligned=aligned_flag,sub_flag=sub_flag,paired_flag=True,sep_max_flag=True,**kwargs)
 
     else:
        
         cr_heatmap_data=heatdt['full_heat_map'][plt_type]
-        
+        base_bnds=np.array([-np.pi/9, np.pi/9])
+        bnd_sectors=[base_bnds, base_bnds+np.pi/2, base_bnds+2*np.pi/2, base_bnds+3*np.pi/2]
+        arc_colvls=['r', 'k' ,'c' ,'b','m','g']
         if renorm_flag:
             cr_heatmap_data['norm_heat_map_vls']=cr_heatmap_data['norm_heat_map_vls']/sum(sum(cr_heatmap_data['norm_heat_map_vls']))
 
         if plot_colorbar_flag:
-            plt.polar_heat_map(ax,cr_heatmap_data,shift_vertical_flag=True,aligned=aligned_flag,sub_flag=sub_flag,colorbar_ax=colorbar_ax,fig_flag=kwargs['fig_flag'])
+            plt.polar_heat_map(ax,cr_heatmap_data,shift_vertical_flag=True,aligned=aligned_flag,sub_flag=sub_flag,
+                colorbar_ax=colorbar_ax,fig_flag=kwargs['fig_flag'])
         else:
             plt.polar_heat_map(ax,cr_heatmap_data,shift_vertical_flag=True,aligned=aligned_flag,sub_flag=sub_flag)
     if plot_transect_flag:
@@ -445,18 +444,24 @@ def make_heat_map(heatdt,**kwargs):
 
 
 
-def arbitary_transect_from_heat_map(ax,heatdt,**kwargs):
-    try:
-        vecmin=kwargs['vecmin']
-    except:
-        vecmin=0
-    if vecmin:
-        num_inds_to_use=len(np.where(heatdt['thetaedges']>0.9)[0])
-    sub_array=sub_array=heatdt['norm_heat_map_vls'][:,-2:]
-    sumvls=np.sum(sub_array,axis=1)
-    norm_sumvls=sumvls/np.sum(sumvls)
+def arbitary_transect_from_heat_map(ax,heatdt,color='k',plot_mean=False,**kwargs):
     
-    ax.step(heatdt['redges'][:-1],norm_sumvls,color='k',drawstyle='steps-post')
+    vecminvls=[0.9]
+    
+    #    num_inds_to_use=len(np.where(heatdt['thetaedges']>0.9)[0])
+    for ind,crvecminvl in enumerate(vecminvls):
+        if ind==0:
+            startvl=2
+        
+
+        sub_array=heatdt['norm_heat_map_vls'][:,-startvl:]
+        sumvls=np.sum(sub_array,axis=1)
+        norm_sumvls=sumvls/np.sum(sumvls)
+        crmean=calc.weighted_mean(norm_sumvls,heatdt['redges'],mn_type='norm')
+        ax.step(heatdt['redges'][:-1],norm_sumvls,color=color,drawstyle='steps-post',linewidth=0.5)
+        if plot_mean:
+            
+            ax.plot(crmean,kwargs['mnht'],'v',color=color,markersize=2,clip_on=False)
     
 
 
