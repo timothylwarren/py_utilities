@@ -542,20 +542,17 @@ def polar_heat_map(ax,heat_data,**kwargs):
 
     #pdb.set_trace()
     
-    if plot_arc_flag:
-        arc_r_pos=1.05
-        for crind,crarcpair in enumerate(arc_positions):
-            #rvl=kwargs['plot_r_bnpds']
-            polar_circle(ax,crarcpair,arc_r_pos,color=arc_colors[crind],linewidth=2)
-        
-        polar_circle(ax,[0,2*np.pi-.0001],1,color='0.5',linewidth=0.5) 
+    
+    if paired_flag:
+        for inds in [0,1]:
+            crax=ax[inds]
+            add_arc_fxn(crax,plot_arc_flag,**kwargs)
     else:
-        max_bnd=1
-        #rpositions=[1.36,1.1,1.45,1.26]
-        rpositions=[1.26,1.03,1.35,1.16]
-        polar_circle(ax,[0,2*np.pi-.0001],1,color='0.5',linewidth=0.5) 
-    if colorbar_flag:
         
+        add_arc_fxn(ax, plot_arc_flag,**kwargs)
+        
+    if colorbar_flag:
+       
         cmap=pylab.get_cmap('hot')
         #cbar=mpl_cbar.ColorbarBase(colorbar_ax,cmap=cmap,boundaries=[clim[0],clim[1]])
         
@@ -572,6 +569,23 @@ def polar_heat_map(ax,heat_data,**kwargs):
             adjust_polar_ax(ax,plot_power_value,rpositions=rpositions,max_bnd=max_bnd,**kwargs)
 
 
+
+def add_arc_fxn(ax,plot_arc_flag,**kwargs):
+    if plot_arc_flag:
+        arc_r_pos=1.05
+        for crind,crarcpair in enumerate(kwargs['arc_positions']):
+                #rvl=kwargs['plot_r_bnpds']
+            polar_circle(ax,crarcpair,arc_r_pos,color=kwargs['arc_colors'][crind],linewidth=2)
+            
+            polar_circle(ax,[0,2*np.pi-.0001],1,color='0.5',linewidth=0.5) 
+    else:
+        max_bnd=1
+            #rpositions=[1.36,1.1,1.45,1.26]
+        rpositions=[1.26,1.03,1.35,1.16]
+        polar_circle(ax,[0,2*np.pi-.0001],1,color='0.5',linewidth=0.5) 
+
+
+
 def make_colorbar(fig_flag,mesh,**kwargs):
 
     
@@ -585,6 +599,7 @@ def make_colorbar(fig_flag,mesh,**kwargs):
 
         #labels[0]='0'
         #labels[1]=
+    
     for l in colorbar_ax.xaxis.get_ticklabels():
         l.set_fontsize(4)
     colorbar_ax.tick_params(axis='both', which='both',length=0)
@@ -595,11 +610,11 @@ def make_colorbar(fig_flag,mesh,**kwargs):
     colorbar_ax.set_xlabel("occupance probability",fontsize=4)
     colorbar_ax.xaxis.labelpad= -1 
     colorbar_ax.tick_params(axis='both', which='major', pad=0)
-    try:
-        cb.outline.set_color('0.5')
-    except:
-        pdb.set_trace()
-    cb.outline.set_linewidth(0.5)
+    #try:
+     #   cb.outline.set_color('0.5')
+    #except:
+     #   pdb.set_trace()
+    #cb.outline.set_linewidth(0.5)
 
         #formatter = FuncFormatter(my_formatter)
 
@@ -1194,9 +1209,10 @@ def polar_circle(ax,thetavls,rvls,**kwargs):
     except:
         pdb.set_trace()
     crcol=kwargs['color']
-    
-    ax.plot(xvls,rvls,crcol,linewidth=linewidth)
-
+    try:
+        ax.plot(xvls,rvls,crcol,linewidth=linewidth)
+    except:
+        pdb.set_trace()
 
 def plot_transects(ax,ave_heatmap_data,**kwargs):
     

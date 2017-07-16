@@ -238,8 +238,8 @@ def plot_motor(indt,ax,**kwargs):
     if mnvl:
        
         deg_mn=calc.rad_to_deg(mnvl)
-        ax.plot([0,15],[deg_mn, deg_mn],linestyle='--', dashes=(2, 1),color='r')
-        ax.plot([0,15],[deg_mn+180, deg_mn+180],linestyle='--', dashes=(2, 1),color='r')
+        #ax.plot([0,15],[deg_mn, deg_mn],linestyle='--', dashes=(2, 1),color='r')
+        #ax.plot([0,15],[deg_mn+180, deg_mn+180],linestyle='--', dashes=(2, 1),color='r')
             #ax.plot([0, 1], [0, 1], linestyle='--', dashes=(5, 1)) #length of 5, space of 1
 
 
@@ -274,7 +274,7 @@ def plot_motor(indt,ax,**kwargs):
     if plot_left_axis:
         ax.get_yaxis().set_ticks([0,90,180,270,360])
         ax.get_yaxis().set_ticklabels(['0','9','180','270','360'],fontsize=6)
-        ax.set_ylabel('polarizer', fontsize=6)
+        ax.set_ylabel('polarizer\n($^\circ$)', fontsize=6)
     
     if xtickflag:
         xticks=kwargs['xticks']
@@ -290,16 +290,16 @@ def plot_motor(indt,ax,**kwargs):
         #ax.set_ylabel('polarizer heading', fontsize=9)
             ax.get_xaxis().set_ticks(xticks)
             ax.get_xaxis().set_ticklabels(xticklabels,fontsize=6)
-            ax.set_xlabel('minutes', fontsize=6)
+            ax.set_xlabel('time (min.)', fontsize=6)
     except:
         ax.get_xaxis().set_ticks(xticks)
         ax.get_xaxis().set_ticklabels(xticklabels,fontsize=6)
-        ax.set_xlabel('minutes', fontsize=6)
+        ax.set_xlabel('time (min.)', fontsize=6)
     #pdb.set_trace()
     ax.set_xlim(xlim)
     #ax.set_aspect(0.005)
-    ax.xaxis.labelpad = AXISPAD
-    ax.yaxis.labelpad= -2
+    ax.xaxis.labelpad = -3
+    ax.yaxis.labelpad= 1
     ax.set_ylim([0,360])
 
 ##
@@ -411,17 +411,20 @@ def make_heat_map(ax,heatdt,**kwargs):
             plt.polar_heat_map(ax,cr_heatmap_data,shift_vertical_flag=True,sub_flag=sub_flag,**kwargs)
 
     elif paired_flag:
-        
-        heatmap_list=heatdt['full_heat_map'][plt_type]
+        try:
+            heatmap_list=heatdt['full_heat_map'][plt_type]
+        except:
+            pdb.set_trace()
         if not 'redges' in heatmap_list.keys():
             heatmap_list['redges']=heatmap_list['r'][:,0]
             heatmap_list['thetaedges']=heatmap_list['theta'][0,:]
             
         cr_heatmap_data=heatmap_list
+       
         if plot_colorbar_flag:
-            plt.polar_heat_map(ax,heatmap_list,shift_vertical_flag=True,aligned=aligned_flag,sub_flag=sub_flag,paired_flag=True,sep_max_flag=True,colorbar_ax=colorbar_ax,**kwargs)
+            plt.polar_heat_map(ax,heatmap_list,shift_vertical_flag=True,sub_flag=sub_flag,sep_max_flag=True,**kwargs)
         else:
-            plt.polar_heat_map(ax,heatmap_list,shift_vertical_flag=True,aligned=aligned_flag,sub_flag=sub_flag,paired_flag=True,sep_max_flag=True,**kwargs)
+            plt.polar_heat_map(ax,heatmap_list,shift_vertical_flag=True,sub_flag=sub_flag,sep_max_flag=True,**kwargs)
 
     else:
        
