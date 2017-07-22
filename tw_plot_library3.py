@@ -517,7 +517,7 @@ def polar_heat_map(ax,heat_data,**kwargs):
         rplot=rmod
     
     
-    
+    pdb.set_trace()
     if shift_vertical_flag:
         thetamod=thetamod+offset_vl
     

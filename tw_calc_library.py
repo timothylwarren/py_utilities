@@ -16,7 +16,18 @@ pylab.ion()
 #from pylab import plot, show, title, xlabel, ylabel, subplot
 #from scipy import fft, arange
 
+def calc_offset_hist(indt,offset_value):
+    mot_inds=np.arange(0,len(indt['time_in_min']))
+    
+    tmp_mot_rad=indt['mot_rad'][mot_inds]
 
+    mot_rad=tmp_mot_rad-offset_value
+    crdeg=rad_to_deg(standardize_angle(mot_rad,2*np.pi,force_positive=1))
+    deg_per_bin=10
+    degbins = np.arange(0,370,deg_per_bin)           
+                
+    hstout_dt=make_hist_calculations(crdeg,degbins)
+    return hstout_dt
 def heat_map_relative_weights(heatmap,rvalues):
     #find indices between -90,90
     #90,270
