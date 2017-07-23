@@ -40,7 +40,11 @@ def plot_legend(crax,positions, colors, strvls):
             crax.text(crposition[0],crposition[1],strvls[crind],fontsize=5,color=colors[crind])
     else:
         crax.text(positions[0],positions[1],strvls,fontsize=5,color=colors)
+
 def fill_between_steps(x, y1, y2=0, h_align='mid', ax=None, **kwargs):
+    #this function written by someone else who posted it.
+    #source is https://gist.github.com/thriveth/8352565
+
     ''' Fills a hole in matplotlib: fill_between for step plots.
     Parameters :
     ------------
@@ -462,6 +466,7 @@ def polar_heat_map(ax,heat_data,**kwargs):
     else:
         calc_clim_flag=True
     if 'aligned' in kwargs:
+        
         if kwargs['aligned']:
             dat_type='realigned_norm_heat_map_vls'
         else:
@@ -517,7 +522,7 @@ def polar_heat_map(ax,heat_data,**kwargs):
         rplot=rmod
     
     
-    pdb.set_trace()
+    
     if shift_vertical_flag:
         thetamod=thetamod+offset_vl
     
@@ -566,7 +571,7 @@ def polar_heat_map(ax,heat_data,**kwargs):
         if plot_arc_flag:
             adjust_polar_ax(ax,plot_power_value,**kwargs) 
         else:
-            adjust_polar_ax(ax,plot_power_value,rpositions=rpositions,max_bnd=max_bnd,**kwargs)
+            adjust_polar_ax(ax,plot_power_value,**kwargs)
 
 
 

@@ -447,25 +447,29 @@ def make_heat_map(ax,heatdt,**kwargs):
 
 
 
-def arbitary_transect_from_heat_map(ax,heatdt,color='k',plot_mean=False,**kwargs):
+def arbitary_transect_from_heat_map(ax,heatdt,color='k',plot_mean=False,vecminvls=[0.9],withhold_plot=False,**kwargs):
     
-    vecminvls=[0.9]
+    histvl={}
     
     #    num_inds_to_use=len(np.where(heatdt['thetaedges']>0.9)[0])
     for ind,crvecminvl in enumerate(vecminvls):
-        if ind==0:
-            startvl=2
         
+        if crvecminvl==0.9:
+            startvl=2
+        elif crvecminvl==0.8:
+            startvl=4
 
         sub_array=heatdt['norm_heat_map_vls'][:,-startvl:]
         sumvls=np.sum(sub_array,axis=1)
         norm_sumvls=sumvls/np.sum(sumvls)
-        crmean=calc.weighted_mean(norm_sumvls,heatdt['redges'],mn_type='norm')
-        ax.step(heatdt['redges'][:-1],norm_sumvls,color=color,drawstyle='steps-post',linewidth=0.5)
-        if plot_mean:
+        histvl[crvecminvl]=norm_sumvls
+        if not withhold_plot:
+            crmean=calc.weighted_mean(norm_sumvls,heatdt['redges'],mn_type='norm')
+            ax.step(heatdt['redges'][:-1],norm_sumvls,color=color,drawstyle='steps-post',linewidth=0.5)
+            if plot_mean:
             
-            ax.plot(crmean,kwargs['mnht'],'v',color=color,markersize=2,clip_on=False)
-    
+                ax.plot(crmean,kwargs['mnht'],'v',color=color,markersize=2,clip_on=False)
+    return histvl
 
 
 def plot_wings(indt,ax,**kwargs):
