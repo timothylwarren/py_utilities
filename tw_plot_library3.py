@@ -430,7 +430,7 @@ def polar_plot(axh,sumstats,**kwargs):
 
 #input is a dict of sumstats
 
-def polar_heat_map(ax,heat_data,**kwargs):
+def polar_heat_map(ax,heat_data,shift_vertical_flag=False,**kwargs):
     cbar_shrink=0.1
     cbar_pad=.1
     cbar_aspect=10
@@ -480,11 +480,7 @@ def polar_heat_map(ax,heat_data,**kwargs):
     else:
         indflag=0
 
-    try:
-        shift_vertical_flag=kwargs['shift_vertical_flag']
-    except:
-        shift_vertical_flag=False
-
+    
     try:
         sep_max_flag=kwargs['sep_max_flag']
     except:
@@ -503,15 +499,7 @@ def polar_heat_map(ax,heat_data,**kwargs):
         offset_vl=kwargs['offset_vl']
     except:
         offset_vl=np.pi/2
-    # if 'theta' in kwargs:
-    #     theta=kwargs['theta']
-    # else:
-    #     theta=heat_data['theta']
-    # if 'r' in kwargs:
-    #     rvl=kwargs['r']
-    # else:
-    #     rvl=heat_data['r']
-   
+  
     try:
         rmod, thetamod=np.meshgrid( heat_data['thetaedges'],heat_data['redges'])
     except:
@@ -525,10 +513,15 @@ def polar_heat_map(ax,heat_data,**kwargs):
     
     if shift_vertical_flag:
         thetamod=thetamod+offset_vl
-    
+        
+        #kwargs['arc_positions']=kwargs['arc_positions']
     
     if calc_clim_flag:
         clim=[0,np.max(heat_data[dat_type])]
+
+
+    #check if sum >1
+
 
 
     if paired_flag:  
@@ -544,9 +537,20 @@ def polar_heat_map(ax,heat_data,**kwargs):
     else:
         
         mesh=ax.pcolormesh(thetamod,rplot,heat_data[dat_type],cmap='hot',vmin=clim[0],vmax=clim[1])
-
-    #pdb.set_trace()
     
+    # if shift_vertical_flag:
+
+    #     len_colors=len(kwargs['arc_colors'])
+    #     if len_colors>1:
+    #         pdb.set_trace()
+    #         inds=np.arange(len_colors)
+    #         pdb.set_trace()
+    #         new_inds=np.mod(inds+1,len_colors)
+    #         kwargs['arc_colors']=kwargs['arc_colors'][new_inds]
+    #     else:
+    #         tst=1
+    # else:
+    #     tst=1
     
     if paired_flag:
         for inds in [0,1]:
@@ -575,19 +579,20 @@ def polar_heat_map(ax,heat_data,**kwargs):
 
 
 
-def add_arc_fxn(ax,plot_arc_flag,**kwargs):
+def add_arc_fxn(ax,plot_arc_flag,arc_r_pos=1.05,**kwargs):
     if plot_arc_flag:
-        arc_r_pos=1.05
+        
         for crind,crarcpair in enumerate(kwargs['arc_positions']):
                 #rvl=kwargs['plot_r_bnpds']
+            
             polar_circle(ax,crarcpair,arc_r_pos,color=kwargs['arc_colors'][crind],linewidth=2)
             
             polar_circle(ax,[0,2*np.pi-.0001],1,color='0.5',linewidth=0.5) 
     else:
-        max_bnd=1
+        #max_bnd=1
             #rpositions=[1.36,1.1,1.45,1.26]
-        rpositions=[1.26,1.03,1.35,1.16]
-        polar_circle(ax,[0,2*np.pi-.0001],1,color='0.5',linewidth=0.5) 
+        #rpositions=[1.26,1.03,1.35,1.16]
+        polar_circle(ax,[0,2*np.pi-.0001],kwargs['max_bnd'],color='0.5',linewidth=0.5) 
 
 
 
@@ -646,7 +651,7 @@ def make_colorbar(fig_flag,mesh,**kwargs):
             #ax.pcolormesh(rvl,theta,heat_data[dat_type][ind],cmap='hot',vmin=clim[0],vmax=clim[1])
 
    
-def adjust_polar_ax(ax,plot_power_value,withhold_vert_axis=False,withhold_horiz_axis=False,split_y_label=False,max_bnd=1.1,rpositions=[1.36,1.1,1.45,1.26],sub_flag=False,**kwargs):       
+def adjust_polar_ax(ax,plot_power_value=False,withhold_vert_axis=False,withhold_horiz_axis=False,split_y_label=False,max_bnd=1.1,rpositions=[1.36,1.1,1.45,1.26],sub_flag=False,**kwargs):       
     
     if 'plot_mean' in kwargs:
         
@@ -1123,10 +1128,11 @@ def plot_hist(axh,indata,**kwargs):
     
     bins=np.linspace(BNDS[0],BNDS[1],NUM_BINS+1)
     inarray=data[~np.isnan(data)]
+    pdb.set_trace()
     if calc_dist_flag==0:
         if normvl:
             weights = np.ones_like(inarray)/len(inarray)
-            
+            pdb.set_trace()
             nvl,bins,patches = axh.hist(data[~np.isnan(data)], weights=weights,bins=bins, histtype=his_type, color=COL, orientation=orient,cumulative=cumulative_val,linewidth=linewidth)
                 
      
@@ -1138,7 +1144,7 @@ def plot_hist(axh,indata,**kwargs):
             if no_plot_flag==False:
                 if cumulative_val:
                     pltinds=np.where(np.cumsum(hist)<0.99)[0]
-                    axh.step( (bins[:-1]+offset)[pltinds], np.cumsum(hist)[pltinds],color=COL )
+                    axh.step( (bins[:-1]+offset)[pltinds], np.cumsum(hist)[pltinds],color=COL,linewidth=linewidth )
                 else:
                     axh.step( bins, np.insert(hist,0,0),color=COL )
                     if repeat_pi_interval_flag:
@@ -1215,7 +1221,7 @@ def polar_circle(ax,thetavls,rvls,**kwargs):
         pdb.set_trace()
     crcol=kwargs['color']
     try:
-        ax.plot(xvls,rvls,crcol,linewidth=linewidth)
+        ax.plot(xvls,rvls,color=crcol,linewidth=linewidth)
     except:
         pdb.set_trace()
 
@@ -1258,10 +1264,7 @@ def plot_transects(ax,ave_heatmap_data,**kwargs):
         sector_vls=kwargs['sector_vls']
     except:
         number_of_sectors=6
-    try:
-        bnds=kwargs['bnds']
-    except:
-        pdb.set_trace()
+    
 
     try:
         shift_vertical_flag=kwargs['shift_vertical_flag']
@@ -1290,18 +1293,21 @@ def plot_transects(ax,ave_heatmap_data,**kwargs):
             plotdt=crdt[inds]
             pltax=ax[inds]
             if inds==0:
-                determine_and_plot_transects(pltax,bnds,plotdt,redges,theta,ymax=0.04)
+                determine_and_plot_transects(pltax,plotdt,redges,theta,ymax=0.04)
             else:
-                determine_and_plot_transects(pltax,bnds,plotdt,redges,theta,ymax=0.04,no_legend=True)
+                determine_and_plot_transects(pltax,plotdt,redges,theta,ymax=0.04,no_legend=True)
     else:
         plotdt=crdt
         pltax=ax
-        determine_and_plot_transects(pltax,bnds,plotdt,redges,theta)
+        
+        determine_and_plot_transects(pltax,plotdt,redges,theta,**kwargs)
         
     #ax.grid()
 
 
-def determine_and_plot_transects(ax,bnds,crdt,redges,theta,**kwargs):
+def determine_and_plot_transects(ax,crdt,redges,theta,**kwargs):
+    bnds=kwargs['bnds']
+    
     try:
         colvls=kwargs['colvls']
     except:
@@ -1317,6 +1323,9 @@ def determine_and_plot_transects(ax,bnds,crdt,redges,theta,**kwargs):
     except:
         no_legend=False
     
+    
+
+
     for crbnd in bnds:
 
 
@@ -1357,12 +1366,11 @@ def determine_and_plot_transects(ax,bnds,crdt,redges,theta,**kwargs):
             tst=1
         
        
-        ax.step(xvlsplt[:-1],yplt[:-1],color=colvls[crind],linewidth=0.5)
+        ax.step(xvlsplt[:-1],yplt[:-1],color=kwargs['transect_colvls'][crind],linewidth=0.5)
 
         position=[1.1,.01+.005*crind]
         strvl=legend_text[crind]
-        #if not no_legend:
-         #   plot_legend(ax,position,colvls[crind], strvl)
+       
         
      
                 
