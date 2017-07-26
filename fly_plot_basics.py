@@ -4,7 +4,7 @@ import pdb
 import pylab
 import numpy as np
 from matplotlib.lines import Line2D  
-import tw_plot_library3 as plt
+import tw_plot_library3 as twplt
 import fp_library as fpl
 import tw_calc_library as calc
 import tw_filehandling as fh
@@ -209,7 +209,7 @@ def plot_motor(indt,ax,**kwargs):
                         #2 columns with x values to plot.
                         if len(inds[inds_thresh]):
                             [startinds,stopinds]=calc.find_consecutive_values(inds[inds_thresh])
-                            plt.plot_horizontal_lines(ax,all_time_list[startinds],all_time_list[stopinds],VERTVL)
+                            twplt.plot_horizontal_lines(ax,all_time_list[startinds],all_time_list[stopinds],VERTVL)
             except:
                 tst=1
             
@@ -406,9 +406,9 @@ def make_heat_map(ax,heatdt,**kwargs):
             cr_heatmap_data['norm_heat_map_vls']=cr_heatmap_data['norm_heat_map_vls']/sum(sum(cr_heatmap_data['norm_heat_map_vls']))
 
         if plot_colorbar_flag:
-            plt.polar_heat_map(ax,cr_heatmap_data,shift_vertical_flag=True,sub_flag=sub_flag,**kwargs)
+            twplt.polar_heat_map(ax,cr_heatmap_data,shift_vertical_flag=True,sub_flag=sub_flag,**kwargs)
         else:
-            plt.polar_heat_map(ax,cr_heatmap_data,shift_vertical_flag=True,sub_flag=sub_flag,**kwargs)
+            twplt.polar_heat_map(ax,cr_heatmap_data,shift_vertical_flag=True,sub_flag=sub_flag,**kwargs)
 
     elif paired_flag:
         try:
@@ -422,9 +422,9 @@ def make_heat_map(ax,heatdt,**kwargs):
         cr_heatmap_data=heatmap_list
        
         if plot_colorbar_flag:
-            plt.polar_heat_map(ax,heatmap_list,shift_vertical_flag=True,sub_flag=sub_flag,sep_max_flag=True,**kwargs)
+            twplt.polar_heat_map(ax,heatmap_list,shift_vertical_flag=True,sub_flag=sub_flag,sep_max_flag=True,**kwargs)
         else:
-            plt.polar_heat_map(ax,heatmap_list,shift_vertical_flag=True,sub_flag=sub_flag,sep_max_flag=True,**kwargs)
+            twplt.polar_heat_map(ax,heatmap_list,shift_vertical_flag=True,sub_flag=sub_flag,sep_max_flag=True,**kwargs)
 
     else:
        
@@ -436,14 +436,14 @@ def make_heat_map(ax,heatdt,**kwargs):
             cr_heatmap_data['norm_heat_map_vls']=cr_heatmap_data['norm_heat_map_vls']/sum(sum(cr_heatmap_data['norm_heat_map_vls']))
 
         if plot_colorbar_flag:
-            plt.polar_heat_map(ax,cr_heatmap_data,shift_vertical_flag=True,aligned=aligned_flag,sub_flag=sub_flag,
+            twplt.polar_heat_map(ax,cr_heatmap_data,shift_vertical_flag=True,aligned=aligned_flag,sub_flag=sub_flag,
                 colorbar_ax=colorbar_ax,fig_flag=kwargs['fig_flag'])
         else:
-            plt.polar_heat_map(ax,cr_heatmap_data,shift_vertical_flag=True,aligned=aligned_flag,sub_flag=sub_flag)
+            twplt.polar_heat_map(ax,cr_heatmap_data,shift_vertical_flag=True,aligned=aligned_flag,sub_flag=sub_flag)
     if plot_transect_flag:
         base_bnds=np.array([-np.pi/9, np.pi/9])
         bnd_sectors=[base_bnds, base_bnds+np.pi/2, base_bnds+2*np.pi/2, base_bnds+3*np.pi/2]
-        plt.plot_transects(transect_ax,cr_heatmap_data,aligned=True,ax_schematic=ax_schematic,bnds=bnd_sectors,paired_flag=paired_flag)
+        twplt.plot_transects(transect_ax,cr_heatmap_data,aligned=True,ax_schematic=ax_schematic,bnds=bnd_sectors,paired_flag=paired_flag)
 
 
 
@@ -462,7 +462,7 @@ def arbitary_transect_from_heat_map(ax,heatdt,color='k',plot_mean=False,vecminvl
         sub_array=heatdt['norm_heat_map_vls'][:,-startvl:]
         sumvls=np.sum(sub_array,axis=1)
         norm_sumvls=sumvls/np.sum(sumvls)
-        histvl[crvecminvl]=norm_sumvls
+        histvl[crve_ecminvl]=norm_sumvls
         if not withhold_plot:
             crmean=calc.weighted_mean(norm_sumvls,heatdt['redges'],mn_type='norm')
             ax.step(heatdt['redges'][:-1],norm_sumvls,color=color,drawstyle='steps-post',linewidth=0.5)
