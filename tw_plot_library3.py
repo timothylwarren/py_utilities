@@ -430,7 +430,7 @@ def polar_plot(axh,sumstats,**kwargs):
 
 #input is a dict of sumstats
 
-def polar_heat_map(ax,heat_data,shift_vertical_flag=False,**kwargs):
+def polar_heat_map(heat_data,ax=[],shift_vertical_flag=False,plot_colorbar_flag=False,**kwargs):
     cbar_shrink=0.1
     cbar_pad=.1
     cbar_aspect=10
@@ -455,10 +455,10 @@ def polar_heat_map(ax,heat_data,shift_vertical_flag=False,**kwargs):
         sub_flag=False
     try:
         colorbar_ax=kwargs['colorbar_ax']
-        colorbar_flag=True
+        #colorbar_flag=True
         fig_flag=kwargs['fig_flag']
     except:
-        colorbar_flag=False
+        plot_colorbar_flag=False
 
     if 'clim' in kwargs:
         clim=np.array([0,kwargs['clim']])
@@ -560,7 +560,7 @@ def polar_heat_map(ax,heat_data,shift_vertical_flag=False,**kwargs):
         
         add_arc_fxn(ax, plot_arc_flag,**kwargs)
         
-    if colorbar_flag:
+    if plot_colorbar_flag:
        
         cmap=pylab.get_cmap('hot')
         #cbar=mpl_cbar.ColorbarBase(colorbar_ax,cmap=cmap,boundaries=[clim[0],clim[1]])
@@ -1128,7 +1128,7 @@ def plot_hist(axh,indata,**kwargs):
     
     bins=np.linspace(BNDS[0],BNDS[1],NUM_BINS+1)
     inarray=data[~np.isnan(data)]
-    pdb.set_trace()
+    
     if calc_dist_flag==0:
         if normvl:
             weights = np.ones_like(inarray)/len(inarray)
