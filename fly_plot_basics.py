@@ -48,7 +48,7 @@ def line_vec_strength(indt,ax):
     plt_veclst=all_vec_list[inds]
     plt_timelst=all_time_list[inds]
         
-    ax.plot(plt_timelst,plt_veclst)
+    ax.plot(plt_timelst,plt_veclst,linewidth=0.5)
     fpl.adjust_spines(ax,['left', 'bottom'])
     ax.set_ylim([0,1])
     ax.set_xlim([0,15])
@@ -135,7 +135,7 @@ def pad_vector_lists(indt):
     return timelst,veclst
 
 
-def plot_motor(indt,ax,**kwargs):
+def plot_motor(indt,ax,withhold_bottom_axis=False,**kwargs):
     
     VERTVL=370
     if 'zoom_times' in kwargs:
@@ -257,24 +257,28 @@ def plot_motor(indt,ax,**kwargs):
         ax.plot(time[crind],mot[crind],'co')
     
     
-    try:
+    
        
-        if plot_left_axis:
-            fpl.adjust_spines(ax,['left','bottom'])
-        
-        else:
-        
-            fpl.adjust_spines(ax,['bottom'])
+    if plot_left_axis:
+        fpl.adjust_spines(ax,['left','bottom'])
+    
+    elif withhold_bottom_axis:
+        fpl.adjust_spines(ax,['left'])
+        ax.get_xaxis().set_ticklabels([],fontsize=6)
+
+    else:
+
+    
+        fpl.adjust_spines(ax,['bottom'])
         
         #elif (plot_left_axis) and (self.last_row_flag==0):
          #   ax.axis('off')
             #fpl.adjust_spines(ax,['left'])
-    except:
-        fpl.adjust_spines(ax,['left','bottom'])
-    if plot_left_axis:
-        ax.get_yaxis().set_ticks([0,90,180,270,360])
-        ax.get_yaxis().set_ticklabels(['0','9','180','270','360'],fontsize=6)
-        ax.set_ylabel('polarizer\n($^\circ$)', fontsize=6)
+    
+    
+    ax.get_yaxis().set_ticks([0,90,180,270,360])
+    ax.get_yaxis().set_ticklabels(['0','90','180','270','360'],fontsize=6)
+    ax.set_ylabel('polarizer\n($^\circ$)', fontsize=6)
     
     if xtickflag:
         xticks=kwargs['xticks']
@@ -285,16 +289,18 @@ def plot_motor(indt,ax,**kwargs):
        
     if plot_vert_flag:
         ax.plot([kwargs['plot_vertical'],kwargs['plot_vertical']],[-20,380],'r')
-    try:
-        if self.last_row_flag:
-        #ax.set_ylabel('polarizer heading', fontsize=9)
+    if not withhold_bottom_axis:
+        pdb.set_trace()
+        try:
+            if self.last_row_flag:
+            #ax.set_ylabel('polarizer heading', fontsize=9)
+                ax.get_xaxis().set_ticks(xticks)
+                ax.get_xaxis().set_ticklabels(xticklabels,fontsize=6)
+                ax.set_xlabel('time (min.)', fontsize=6)
+        except:
             ax.get_xaxis().set_ticks(xticks)
             ax.get_xaxis().set_ticklabels(xticklabels,fontsize=6)
             ax.set_xlabel('time (min.)', fontsize=6)
-    except:
-        ax.get_xaxis().set_ticks(xticks)
-        ax.get_xaxis().set_ticklabels(xticklabels,fontsize=6)
-        ax.set_xlabel('time (min.)', fontsize=6)
     #pdb.set_trace()
     ax.set_xlim(xlim)
     #ax.set_aspect(0.005)
@@ -309,7 +315,7 @@ def plot_motor(indt,ax,**kwargs):
 #time- list of timevalues
 #mot - list of degrees between 0 and 360
 
-def sub_plot_motor(ax,time,mot,**kwargs):
+def sub_plot_motor(ax,time,mot,linewidth=0.5,**kwargs):
     
     try:
         max_allowed_difference=kwargs['max_allowed_difference']
@@ -340,7 +346,7 @@ def sub_plot_motor(ax,time,mot,**kwargs):
         for crind,crmot_splitinds in enumerate(mot_split_array):
             if np.size(crmot_splitinds):
                 
-                ax.plot(time_split_array[crind],crmot_splitinds,color=col,linewidth=0.5)
+                ax.plot(time_split_array[crind],crmot_splitinds,color=col,linewidth=linewidth)
             
     return time_split_array, mot_split_array
 
@@ -489,15 +495,15 @@ def plot_wings(indt,ax,**kwargs):
         lftwng=indt['lftwng'][inds]
         rtwng=indt['rtwng'][inds]
         
-        ax.plot(plot_time,np.array(lftwng),colvls[0],linewidth=0.7)
-        ax.plot(plot_time,np.array(rtwng),colvls[1],linewidth=0.7)
-        ax.get_yaxis().set_ticks([35,50,65,80])
-        fpl.adjust_spines(ax,['left'])
-        ax.get_yaxis().set_ticklabels(['35','50','65','80'],fontsize=9)
-        ax.set_ylabel('wing angle', fontsize=9)
+        ax.plot(plot_time,np.array(lftwng),colvls[0],linewidth=0.3)
+        ax.plot(plot_time,np.array(rtwng),colvls[1],linewidth=0.3)
+        ax.get_yaxis().set_ticks([25,80])
+        fpl.adjust_spines(ax,['left','bottom'])
+        ax.get_yaxis().set_ticklabels(['25','80'],fontsize=6)
+        ax.set_ylabel('wing angle', fontsize=6)
         ax.set_ylim([25,80])
-        ax.text(0,70,'left wing',fontsize=9,color=colvls[0])
-        ax.text(5,70,'right wing',fontsize=9,color=colvls[1])
+        ax.text(0,70,'left wing',fontsize=4,color=colvls[0])
+        ax.text(5,70,'right wing',fontsize=4,color=colvls[1])
         if type=='zoom':
             ax.set_xlim([plot_time[0],plot_time[-1]])
         else:
