@@ -559,6 +559,7 @@ def polar_heat_map(heat_data,ax=[],shift_vertical_flag=False,plot_colorbar_flag=
         
         add_arc_fxn(ax, plot_arc_flag,**kwargs)
         
+    
     if plot_colorbar_flag:
        
         cmap=pylab.get_cmap('hot')
@@ -583,7 +584,7 @@ def add_arc_fxn(ax,plot_arc_flag,arc_r_pos=1.05,**kwargs):
         
         for crind,crarcpair in enumerate(kwargs['arc_positions']):
                 #rvl=kwargs['plot_r_bnpds']
-            
+           
             polar_circle(ax,crarcpair,arc_r_pos,color=kwargs['arc_colors'][crind],linewidth=2)
             
             polar_circle(ax,[0,2*np.pi-.0001],1,color='0.5',linewidth=0.5) 
@@ -591,7 +592,11 @@ def add_arc_fxn(ax,plot_arc_flag,arc_r_pos=1.05,**kwargs):
         #max_bnd=1
             #rpositions=[1.36,1.1,1.45,1.26]
         #rpositions=[1.26,1.03,1.35,1.16]
-        polar_circle(ax,[0,2*np.pi-.0001],kwargs['max_bnd'],color='0.5',linewidth=0.5) 
+        if 'max_bnd' in kwargs:
+            rvl=kwargs['max_bnd']
+        else:
+            rvl=1
+        polar_circle(ax,[0,2*np.pi-.0001],rvl,color='0.5',linewidth=0.5) 
 
 
 
@@ -1286,15 +1291,22 @@ def plot_transects(ax,ave_heatmap_data,**kwargs):
     
     CTR=0
     
+    
     if paired_flag:  
         
         for inds in [0,1]:
             plotdt=crdt[inds]
             pltax=ax[inds]
             if inds==0:
+<<<<<<< HEAD
                 determine_and_plot_transects(pltax,plotdt,redges,theta,ymax=0.04, **kwargs)
             else:
                 determine_and_plot_transects(pltax,plotdt,redges,theta,ymax=0.04,no_legend=True, **kwargs)
+=======
+                determine_and_plot_transects(pltax,plotdt,redges,theta,ymax=0.04,**kwargs)
+            else:
+                determine_and_plot_transects(pltax,plotdt,redges,theta,ymax=0.04,no_legend=True,**kwargs)
+>>>>>>> 0dd8a93eaf7f9ae9a32b8f9bc8acbbf45b82a14f
     else:
         plotdt=crdt
         pltax=ax
@@ -1365,7 +1377,10 @@ def determine_and_plot_transects(ax,crdt,redges,theta,**kwargs):
             #pdb.set_trace()  
             tst=1
         
+<<<<<<< HEAD
         
+=======
+>>>>>>> 0dd8a93eaf7f9ae9a32b8f9bc8acbbf45b82a14f
         ax.step(xvlsplt[:-1],yplt[:-1],color=kwargs['transect_colvls'][crind],linewidth=0.5)
 
         position=[1.1,.01+.005*crind]
