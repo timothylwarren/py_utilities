@@ -1298,15 +1298,9 @@ def plot_transects(ax,ave_heatmap_data,**kwargs):
             plotdt=crdt[inds]
             pltax=ax[inds]
             if inds==0:
-<<<<<<< HEAD
                 determine_and_plot_transects(pltax,plotdt,redges,theta,ymax=0.04, **kwargs)
             else:
                 determine_and_plot_transects(pltax,plotdt,redges,theta,ymax=0.04,no_legend=True, **kwargs)
-=======
-                determine_and_plot_transects(pltax,plotdt,redges,theta,ymax=0.04,**kwargs)
-            else:
-                determine_and_plot_transects(pltax,plotdt,redges,theta,ymax=0.04,no_legend=True,**kwargs)
->>>>>>> 0dd8a93eaf7f9ae9a32b8f9bc8acbbf45b82a14f
     else:
         plotdt=crdt
         pltax=ax
@@ -1377,10 +1371,7 @@ def determine_and_plot_transects(ax,crdt,redges,theta,**kwargs):
             #pdb.set_trace()  
             tst=1
         
-<<<<<<< HEAD
-        
-=======
->>>>>>> 0dd8a93eaf7f9ae9a32b8f9bc8acbbf45b82a14f
+
         ax.step(xvlsplt[:-1],yplt[:-1],color=kwargs['transect_colvls'][crind],linewidth=0.5)
 
         position=[1.1,.01+.005*crind]
