@@ -446,7 +446,7 @@ def polar_heat_map(heat_data,ax=[],shift_vertical_flag=False,plot_colorbar_flag=
         arc_colors=kwargs['arc_colors']
         plot_arc_flag=True
     except:
-        
+        pdb.set_trace()
         plot_arc_flag=False
     try:
         sub_flag=kwargs['sub_flag']
@@ -500,10 +500,9 @@ def polar_heat_map(heat_data,ax=[],shift_vertical_flag=False,plot_colorbar_flag=
     except:
         offset_vl=np.pi/2
   
-    try:
-        rmod, thetamod=np.meshgrid( heat_data['thetaedges'],heat_data['redges'])
-    except:
-        pdb.set_trace()
+    
+    rmod, thetamod=np.meshgrid( heat_data['thetaedges'],heat_data['redges'])
+    
     if plot_power_value:
         rplot=np.power(plot_power_value,rmod)
     else:
@@ -1132,7 +1131,7 @@ def plot_hist(axh,indata,**kwargs):
     if calc_dist_flag==0:
         if normvl:
             weights = np.ones_like(inarray)/len(inarray)
-            pdb.set_trace()
+            
             nvl,bins,patches = axh.hist(data[~np.isnan(data)], weights=weights,bins=bins, histtype=his_type, color=COL, orientation=orient,cumulative=cumulative_val,linewidth=linewidth)
                 
      
@@ -1293,9 +1292,9 @@ def plot_transects(ax,ave_heatmap_data,**kwargs):
             plotdt=crdt[inds]
             pltax=ax[inds]
             if inds==0:
-                determine_and_plot_transects(pltax,plotdt,redges,theta,ymax=0.04)
+                determine_and_plot_transects(pltax,plotdt,redges,theta,ymax=0.04, **kwargs)
             else:
-                determine_and_plot_transects(pltax,plotdt,redges,theta,ymax=0.04,no_legend=True)
+                determine_and_plot_transects(pltax,plotdt,redges,theta,ymax=0.04,no_legend=True, **kwargs)
     else:
         plotdt=crdt
         pltax=ax
@@ -1342,10 +1341,11 @@ def determine_and_plot_transects(ax,crdt,redges,theta,**kwargs):
             #add to last segment to end
             
             crind=np.argmin(np.abs(redges-crbnd[1]))
-            second_sum=np.sum(crdt[0:crind+1,:],axis=0)
+            second_sum=np.sum(crdt[0:crind,:],axis=0)
             summed_vls.append(first_sum+second_sum)
             
         else:
+            
             firstind=np.argmin(np.abs(redges-crbnd[0]))
             secondind=np.argmin(np.abs(redges-crbnd[1]))
             summed_vls.append(np.sum(crdt[firstind:secondind+1,:],axis=0))
@@ -1365,7 +1365,7 @@ def determine_and_plot_transects(ax,crdt,redges,theta,**kwargs):
             #pdb.set_trace()  
             tst=1
         
-       
+        
         ax.step(xvlsplt[:-1],yplt[:-1],color=kwargs['transect_colvls'][crind],linewidth=0.5)
 
         position=[1.1,.01+.005*crind]

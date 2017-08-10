@@ -377,9 +377,9 @@ def make_heat_map(ax,heatdt,**kwargs):
         sub_flag=False
 
     try:
-        paired_flag=kwargs['paired_flag']
+        paired_flagvl=kwargs['paired_flag']
     except:
-        paired_flag=False
+        paired_flagvl=False
 
 
     try:
@@ -410,7 +410,7 @@ def make_heat_map(ax,heatdt,**kwargs):
         else:
             twplt.polar_heat_map(ax,cr_heatmap_data,shift_vertical_flag=True,sub_flag=sub_flag,**kwargs)
 
-    elif paired_flag:
+    elif paired_flagvl:
         try:
             heatmap_list=heatdt['full_heat_map'][plt_type]
         except:
@@ -421,17 +421,23 @@ def make_heat_map(ax,heatdt,**kwargs):
             
         cr_heatmap_data=heatmap_list
        
-        if plot_colorbar_flag:
-            twplt.polar_heat_map(ax,heatmap_list,shift_vertical_flag=True,sub_flag=sub_flag,sep_max_flag=True,**kwargs)
-        else:
-            twplt.polar_heat_map(ax,heatmap_list,shift_vertical_flag=True,sub_flag=sub_flag,sep_max_flag=True,**kwargs)
+        #heat_data,ax=[],shift_vertical_flag=False,plot_colorbar_flag=False,**kwargs
+        twplt.polar_heat_map(heatmap_list,ax=ax,shift_vertical_flag=True,sub_flag=sub_flag,sep_max_flag=True,**kwargs)
+      
+            
 
     else:
        
         cr_heatmap_data=heatdt['full_heat_map'][plt_type]
         base_bnds=np.array([-np.pi/9, np.pi/9])
-        bnd_sectors=[base_bnds, base_bnds+np.pi/2, base_bnds+2*np.pi/2, base_bnds+3*np.pi/2]
-        arc_colvls=['r', 'k' ,'c' ,'b','m','g']
+        #bnd_sectors=[base_bnds, base_bnds+np.pi/2, base_bnds+2*np.pi/2, base_bnds+3*np.pi/2]
+        #arc_colvls=['r', 'k' ,'c' ,'b','m','g']
+
+        arc_bnd_sectors=[base_bnds, base_bnds+np.pi/2, base_bnds+2*np.pi/2, base_bnds+3*np.pi/2]
+        arc_colors=['lime','k','darkgreen',(0.5,0.5,0.5)]
+        trans_bnd_sectors=[base_bnds, base_bnds+np.pi/2, base_bnds+2*np.pi/2, base_bnds+3*np.pi/2]
+        transect_colors=['k','lime',(0.5,0.5,0.5),'darkgreen']
+
         if renorm_flag:
             cr_heatmap_data['norm_heat_map_vls']=cr_heatmap_data['norm_heat_map_vls']/sum(sum(cr_heatmap_data['norm_heat_map_vls']))
 
@@ -443,7 +449,7 @@ def make_heat_map(ax,heatdt,**kwargs):
     if plot_transect_flag:
         base_bnds=np.array([-np.pi/9, np.pi/9])
         bnd_sectors=[base_bnds, base_bnds+np.pi/2, base_bnds+2*np.pi/2, base_bnds+3*np.pi/2]
-        twplt.plot_transects(transect_ax,cr_heatmap_data,aligned=True,ax_schematic=ax_schematic,bnds=bnd_sectors,paired_flag=paired_flag)
+        twplt.plot_transects(transect_ax,cr_heatmap_data,ax_schematic=ax_schematic,bnds=kwargs['arc_bnd_sectors'],**kwargs)
 
 
 
