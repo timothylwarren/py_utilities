@@ -426,16 +426,11 @@ def make_heat_map(ax,heatdt,**kwargs):
             
         cr_heatmap_data=heatmap_list
        
-<<<<<<< HEAD
-        #heat_data,ax=[],shift_vertical_flag=False,plot_colorbar_flag=False,**kwargs
+
         twplt.polar_heat_map(heatmap_list,ax=ax,shift_vertical_flag=True,sub_flag=sub_flag,sep_max_flag=True,**kwargs)
       
             
-=======
-        
-        twplt.polar_heat_map(heatmap_list,ax=ax,shift_vertical_flag=True,sub_flag=sub_flag,sep_max_flag=True,**kwargs)
-        
->>>>>>> 0dd8a93eaf7f9ae9a32b8f9bc8acbbf45b82a14f
+
 
     else:
        
@@ -459,11 +454,8 @@ def make_heat_map(ax,heatdt,**kwargs):
     if plot_transect_flag:
         base_bnds=np.array([-np.pi/9, np.pi/9])
         bnd_sectors=[base_bnds, base_bnds+np.pi/2, base_bnds+2*np.pi/2, base_bnds+3*np.pi/2]
-<<<<<<< HEAD
-        twplt.plot_transects(transect_ax,cr_heatmap_data,ax_schematic=ax_schematic,bnds=kwargs['arc_bnd_sectors'],**kwargs)
-=======
+
         twplt.plot_transects(transect_ax,cr_heatmap_data,ax_schematic=ax_schematic,bnds=bnd_sectors,**kwargs)
->>>>>>> 0dd8a93eaf7f9ae9a32b8f9bc8acbbf45b82a14f
 
 
 

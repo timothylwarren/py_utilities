@@ -430,7 +430,7 @@ def polar_plot(axh,sumstats,**kwargs):
 
 #input is a dict of sumstats
 
-def polar_heat_map(heat_data,ax=[],shift_vertical_flag=False,plot_colorbar_flag=False,**kwargs):
+def polar_heat_map(heat_data,ax=[],shift_vertical_flag=False,plot_colorbar_flag=False,split_flag=False,**kwargs):
     cbar_shrink=0.1
     cbar_pad=.1
     cbar_aspect=10
@@ -446,7 +446,7 @@ def polar_heat_map(heat_data,ax=[],shift_vertical_flag=False,plot_colorbar_flag=
         arc_colors=kwargs['arc_colors']
         plot_arc_flag=True
     except:
-        pdb.set_trace()
+        
         plot_arc_flag=False
     try:
         sub_flag=kwargs['sub_flag']
@@ -459,6 +459,13 @@ def polar_heat_map(heat_data,ax=[],shift_vertical_flag=False,plot_colorbar_flag=
         fig_flag=kwargs['fig_flag']
     except:
         plot_colorbar_flag=False
+
+    try:
+        thetaedges=kwargs['thetaedges']
+        redges=kwargs['redges']
+    except:
+        thetaedges=heat_data['thetaedges']
+        redges=heat_data['redges']
 
     if 'clim' in kwargs:
         clim=np.array([0,kwargs['clim']])
@@ -501,7 +508,7 @@ def polar_heat_map(heat_data,ax=[],shift_vertical_flag=False,plot_colorbar_flag=
         offset_vl=np.pi/2
   
     
-    rmod, thetamod=np.meshgrid( heat_data['thetaedges'],heat_data['redges'])
+    rmod, thetamod=np.meshgrid( thetaedges,redges)
     
     if plot_power_value:
         rplot=np.power(plot_power_value,rmod)
@@ -516,7 +523,10 @@ def polar_heat_map(heat_data,ax=[],shift_vertical_flag=False,plot_colorbar_flag=
         #kwargs['arc_positions']=kwargs['arc_positions']
     
     if calc_clim_flag:
-        clim=[0,np.max(heat_data[dat_type])]
+        if not split_flag:
+            clim=[0,np.max(heat_data[dat_type])]
+        else:
+            clim=[0,np.max(heat_data['norm_heat_map_vls'][1])]
 
 
     #check if sum >1
@@ -534,22 +544,15 @@ def polar_heat_map(heat_data,ax=[],shift_vertical_flag=False,plot_colorbar_flag=
             mesh=ax[inds].pcolormesh(thetamod,rplot,heat_data[dat_type][inds],cmap='hot',vmin=clim[0],vmax=clim[1])
             paired_mesh.append(mesh)
     else:
-        
-        mesh=ax.pcolormesh(thetamod,rplot,heat_data[dat_type],cmap='hot',vmin=clim[0],vmax=clim[1])
-    
-    # if shift_vertical_flag:
+        if not split_flag:
+            
+            mesh=ax.pcolormesh(thetamod,rplot,heat_data[dat_type],cmap='hot',vmin=clim[0],vmax=clim[1])
+        else:
+            if kwargs['ind_to_plot']:
+                pdb.set_trace()
+            mesh=ax.pcolormesh(thetamod,rplot,heat_data[dat_type][kwargs['ind_to_plot']],cmap='hot',vmin=clim[0],vmax=clim[1])
 
-    #     len_colors=len(kwargs['arc_colors'])
-    #     if len_colors>1:
-    #         pdb.set_trace()
-    #         inds=np.arange(len_colors)
-    #         pdb.set_trace()
-    #         new_inds=np.mod(inds+1,len_colors)
-    #         kwargs['arc_colors']=kwargs['arc_colors'][new_inds]
-    #     else:
-    #         tst=1
-    # else:
-    #     tst=1
+    
     
     if paired_flag:
         for inds in [0,1]:
@@ -624,35 +627,7 @@ def make_colorbar(fig_flag,mesh,**kwargs):
     colorbar_ax.set_xlabel("occupance probability",fontsize=4)
     colorbar_ax.xaxis.labelpad= -1 
     colorbar_ax.tick_params(axis='both', which='major', pad=0)
-    #try:
-     #   cb.outline.set_color('0.5')
-    #except:
-     #   pdb.set_trace()
-    #cb.outline.set_linewidth(0.5)
-
-        #formatter = FuncFormatter(my_formatter)
-
-
-        #colorbar_ax.yaxis.set_major_formatter(formatter)
-#plt.show()
-
-        #colorbar_ax.yaxis.set_ticks(clim)
-        #colorbar_ax.yaxis.set_ticklabels(clim,fontsize=6)
-
-
-
-
-            #ax.pcolormesh(rvl,np.power(plot_power_value,theta),heat_data[dat_type],cmap='hot',vmin=clim[0],vmax=clim[1])
-        
-        
-            #ax.pcolormesh(rvl,theta,heat_data[dat_type],cmap='hot',vmin=clim[0],vmax=clim[1])
-    # else:
-    #     if plot_power_value:
-    #         ax.pcolormesh(thetamod,np.power(plot_power_value,rmod),heat_data[dat_type],cmap='hot',vmin=clim[0],vmax=clim[1])
-    #         #ax.pcolormesh(rvl,np.power(plot_power_value,(theta)),heat_data[dat_type][ind],cmap='hot',vmin=clim[0],vmax=clim[1])
-    #     else:
-    #         ax.pcolormesh(thetamod,np.power(plot_power_value,rmod),heat_data[dat_type],cmap='hot',vmin=clim[0],vmax=clim[1])
-            #ax.pcolormesh(rvl,theta,heat_data[dat_type][ind],cmap='hot',vmin=clim[0],vmax=clim[1])
+   
 
    
 def adjust_polar_ax(ax,plot_power_value=False,withhold_vert_axis=False,withhold_horiz_axis=False,split_y_label=False,max_bnd=1.1,rpositions=[1.36,1.1,1.45,1.26],sub_flag=False,**kwargs):       
@@ -1229,13 +1204,10 @@ def polar_circle(ax,thetavls,rvls,**kwargs):
     except:
         pdb.set_trace()
 
-def plot_transects(ax,ave_heatmap_data,**kwargs):
+def plot_transects(axin,ave_heatmap_data,**kwargs):
     
     WRAP_VALS=True
-    try:
-        PLOT_SECTOR=kwargs['ax_schematic']
-    except:
-        PLOT_SECTOR=True
+    
     #SUM_INDS= [[0,2],[1,3]]
     if 'aligned' in kwargs:
         if kwargs['aligned']:
@@ -1251,12 +1223,14 @@ def plot_transects(ax,ave_heatmap_data,**kwargs):
         crdt=ave_heatmap_data[dat_type]
         
    
-    if 'theta' in kwargs:
-        theta=kwargs['theta']
-    else:
-        theta=ave_heatmap_data['theta']
+    if 'theta' not in kwargs:
+      
+        kwargs['theta']=ave_heatmap_data['theta']
 
-    
+    if 'thetaedges' not in kwargs:
+     
+        kwargs['thetaedges']=ave_heatmap_data['thetaedges']
+
 
     try:
         sector_rvl=kwargs['sector_rvl']
@@ -1296,23 +1270,24 @@ def plot_transects(ax,ave_heatmap_data,**kwargs):
         
         for inds in [0,1]:
             plotdt=crdt[inds]
-            pltax=ax[inds]
+            pltax=axin[inds]
             if inds==0:
-                determine_and_plot_transects(pltax,plotdt,redges,theta,ymax=0.04, **kwargs)
+                determine_and_plot_transects(pltax,plotdt,redges,ymax=0.04, **kwargs)
             else:
-                determine_and_plot_transects(pltax,plotdt,redges,theta,ymax=0.04,no_legend=True, **kwargs)
+                determine_and_plot_transects(pltax,plotdt,redges,ymax=0.04,no_legend=True, **kwargs)
     else:
         plotdt=crdt
-        pltax=ax
+        pltax=axin
         
-        determine_and_plot_transects(pltax,plotdt,redges,theta,**kwargs)
+        proportional_vls=determine_and_plot_transects(pltax,plotdt,redges,**kwargs)
         
+    return proportional_vls
     #ax.grid()
 
 
-def determine_and_plot_transects(ax,crdt,redges,theta,**kwargs):
+def determine_and_plot_transects(pltax,crdt,redges,theta,offset=0,transect_x_type='vector',**kwargs):
     bnds=kwargs['bnds']
-    
+    proportional_vls={}
     try:
         colvls=kwargs['colvls']
     except:
@@ -1329,79 +1304,117 @@ def determine_and_plot_transects(ax,crdt,redges,theta,**kwargs):
         no_legend=False
     
     
+    if transect_x_type=='vector':
+
+        for crbnd in bnds:
 
 
-    for crbnd in bnds:
-
-
-        if crbnd[0]<0:
-            #find how crbnd in radians maps to index on crdt
-            
-            pos_bnd=crbnd[0]+2*np.pi
-            
-            crind=np.argmin(np.abs(redges-pos_bnd))
-            
-            #find index of bnds[0]
-            
-            first_sum=np.sum(crdt[crind:,:],axis=0)
-            #add to last segment to end
-            
-            crind=np.argmin(np.abs(redges-crbnd[1]))
-            second_sum=np.sum(crdt[0:crind,:],axis=0)
-            summed_vls.append(first_sum+second_sum)
-            
-        else:
-            
-            firstind=np.argmin(np.abs(redges-crbnd[0]))
-            secondind=np.argmin(np.abs(redges-crbnd[1]))
-            summed_vls.append(np.sum(crdt[firstind:secondind+1,:],axis=0))
-            #plot sector
-            
-    array_transect_vls=np.array(summed_vls)
-    legend_text=['-20$^\circ$ to 20$^\circ$','70$^\circ$ to 110$^\circ$','160$^\circ$ to 200$^\circ$','250$^\circ$ to 290$^\circ$']
-    for crind,cr_row in enumerate(array_transect_vls):
-
-        xvls=theta[0]
-       
-        xvlsplt=np.append(xvls-xvls[0],1.0)
-
-        yplt=np.append(cr_row,0)
-        
-        if (len(xvlsplt)>11):
-            #pdb.set_trace()  
-            tst=1
-        
-
-        ax.step(xvlsplt[:-1],yplt[:-1],color=kwargs['transect_colvls'][crind],linewidth=0.5)
-
-        position=[1.1,.01+.005*crind]
-        strvl=legend_text[crind]
-       
-        
-     
+            if crbnd[0]<0:
+                #find how crbnd in radians maps to index on crdt
                 
-    fpl.adjust_spines(ax,['left','bottom'])
-    ax.get_xaxis().set_ticks([0,1.0])
-    ax.get_xaxis().set_ticklabels([0,1],fontsize=5)
-    ax.get_yaxis().set_ticks([0,.03])
-    ax.get_yaxis().set_ticklabels([0,.03],fontsize=5)
-    ax.set_xlabel('local\nvector strength', fontsize=5,multialignment='center')
-    #ax.yaxis.labelpad=-2
-    ax.xaxis.labelpad=0
-    ax.set_ylabel('probability',fontsize=5)
-    ax.yaxis.labelpad=-9
-    ax.xaxis.labelpad=0
-    #ax.tick_params(direction='out', pad=1)
-    #mpl.rcParams['xtick.major.size'] = 10
-    #mpl.rcParams['xtick.major.width'] = 1
-    ax.set_xlim([0,1])
+                pos_bnd=crbnd[0]+2*np.pi
+                
+                crind=np.argmin(np.abs(redges-pos_bnd))
+                
+                #find index of bnds[0]
+                
+                first_sum=np.sum(crdt[crind:,:],axis=0)
+                #add to last segment to end
+                
+                crind=np.argmin(np.abs(redges-crbnd[1]))
+                second_sum=np.sum(crdt[0:crind,:],axis=0)
+                summed_vls.append(first_sum+second_sum)
+                
+            else:
+                
+                firstind=np.argmin(np.abs(redges-crbnd[0]))
+                secondind=np.argmin(np.abs(redges-crbnd[1]))
+                summed_vls.append(np.sum(crdt[firstind:secondind+1,:],axis=0))
+                #plot sector
+                
+        array_transect_vls=np.array(summed_vls)
+        xvls=kwargs['thetaedges']
+        xvlsplt=np.append(xvls-xvls[0],1.0)
+    #legend_text=['-20$^\circ$ to 20$^\circ$','70$^\circ$ to 110$^\circ$','160$^\circ$ to 200$^\circ$','250$^\circ$ to 290$^\circ$']
     
+    elif transect_x_type == 'position':
+        vec_thresh=kwargs['vec_threshold']
+        vec_ind=np.min(np.where(kwargs['thetaedges']>=vec_thresh))
+        
+        
+        summed_vls=np.sum(crdt[:,vec_ind:],axis=1)
+        #assumes total width is 2*np.pi.
+        #assumes taking 72 to 36 bins
+        array_transect_vls=[]
+        out_edges=[]
+        if offset:
+            ind_offset=np.where(redges==offset)[0][0]
+            new_edges=redges-offset
+            neg_inds=np.where(new_edges<0)
+            new_edges[neg_inds]=new_edges[neg_inds]+2*np.pi
+            xvlsplt=new_edges
+        for crvl in np.linspace(0,70,36):
+            
+            array_transect_vls.append(summed_vls[crvl]+summed_vls[crvl+1])
+            
+        initxvls=redges
+        
+    if transect_x_type=='vector':
 
+        for crind,cr_row in enumerate(array_transect_vls):
+
+            yplt=np.append(cr_row,0)
+            
+            try:
+                pltax.step(xvlsplt[:-1],yplt,color=kwargs['transect_colvls'][crind],linewidth=0.5)
+            except:
+                pdb.set_trace()
+            position=[1.1,.01+.005*crind]
+            #strvl=legend_text[crind]
+       
+    elif transect_x_type == 'position':     
+        yplt=np.array(array_transect_vls)
+            
+        x_unsorted=xvlsplt[0:-1:2]
+        
+        sortinds=np.argsort(x_unsorted)
+        pltax.step(x_unsorted[sortinds],yplt[sortinds],color=kwargs['transect_colvls'][0],linewidth=0.5)
+
+    if transect_x_type=='vector':            
+        fpl.adjust_spines(pltax,['left','bottom'])
+        pltax.get_xaxis().set_ticks([0,1.0])
+        pltax.get_xaxis().set_ticklabels([0,1],fontsize=5)
+        pltax.get_yaxis().set_ticks([0,.03])
+        pltax.get_yaxis().set_ticklabels([0,.03],fontsize=5)
+        pltax.set_xlabel('local\nvector strength', fontsize=5,multialignment='center')
+        #ax.yaxis.labelpad=-2
+        pltax.xaxis.labelpad=0
+        pltax.set_ylabel('probability',fontsize=5)
+        pltax.yaxis.labelpad=-9
+        pltax.xaxis.labelpad=0
+        #ax.tick_params(direction='out', pad=1)
+        #mpl.rcParams['xtick.major.size'] = 10
+        #mpl.rcParams['xtick.major.width'] = 1
+        pltax.set_xlim([0,1])
+    
+    elif transect_x_type=='position': 
+        fpl.adjust_spines(pltax,['left','bottom'])
+        pltax.get_xaxis().set_ticks([0,np.pi,2*np.pi])
+        pltax.get_xaxis().set_ticklabels([0,180, 360],fontsize=5)
+        pltax.get_yaxis().set_ticks([0,.01])
+        pltax.get_yaxis().set_ticklabels([0,.01],fontsize=5)
+        pltax.set_xlabel('heading $^\circ$', fontsize=5,multialignment='center')
+        #ax.yaxis.labelpad=-2
+        pltax.xaxis.labelpad=0
+        pltax.set_ylabel('probability',fontsize=5)
+        pltax.yaxis.labelpad=-9
+        pltax.xaxis.labelpad=0
     #ax.set_ylim([0,.05])
     
 
     #ax.set_aspect(40)
-    ax.set_ylim([0,.03])
+        pltax.set_ylim([0,.01])
+    return array_transect_vls
     #ax.get_yaxis().set_ticks(np.arange(0,ymax,0.01))
     #ax.get_yaxis().set_ticklabels(np.arange(0,ymax,0.01),fontsize=6)
     

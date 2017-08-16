@@ -9,12 +9,25 @@ import scipy.signal as sig
 import circ as circ
 import cmath as cmath
 import scipy
-import tw_plot_library3 as plt
+#import tw_plot_library3 as plt
 import csv
-pylab.ion()
+
+#pylab.ion()
 #from numpy import sin, linspace, pi
 #from pylab import plot, show, title, xlabel, ylabel, subplot
 #from scipy import fft, arange
+
+
+def permute_test_for_mean_diff_between_two_groups(dat1, dat2, num_permutations=10000):
+    len_dat1=len(dat1)
+    len_dat2=len(dat2)
+    diff_list=[]
+    for cr_permutation in np.arange(num_permutations):
+        tmptst=dat1+dat2
+        npr.shuffle(tmptst)
+        diff_list.append(np.mean(tmptst[0:len_dat1])-np.mean(tmptst[len_dat1:]))
+    
+    return diff_list
 
 def calc_offset_hist(indt,offset_value):
     mot_inds=np.arange(0,len(indt['time_in_min']))
@@ -556,7 +569,7 @@ def weighted_mean(mnvls,edges,**kwargs):
         anal_180_flag=kwargs['anal_180']
     except:
         anal_180_flag=False
-    
+    pdb.set_trace()
     bin_middles = (edges[:-1] + edges[1:]) / 2
 
     if len(bin_middles)<len(mnvls):
