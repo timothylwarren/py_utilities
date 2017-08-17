@@ -10,6 +10,7 @@ import os
 import shutil
 import time
 import sys
+from py_utilities import tw_calc_library as calc
 
 #requires complete name
 def print_vert(indict):
@@ -23,6 +24,34 @@ def parse_date(fname):
     time=split_fn[-1].split('_')[-1][0:4]
     return date, fly, time
 
+def check_file_size(infile):
+    pdb.set_trace()
+    return os.stat(infile)[6]/1e6
+def make_reduced_txtfile(fname,target_sample_rate=200):
+    #preserve nan values
+    pdb.set_trace()
+    original_dt=np.array(np.genfromtxt(fname))
+    numcols=len(original_dt[0,:])
+    timecol=original_dt[:,0]
+    min_time=np.nanmin(timecol)
+    max_time=np.nanmax(timecol)
+    out_time=np.arange(min_time,max_time,1./target_sample_rate)
+    
+    
+
+           
+                
+    new_time=np.interp(out_time,timecol,timecol)
+
+    #initialize_array
+    out_array=np.zeros((len(new_time),numcols))
+    out_array[:,0]=new_time
+    for crcol in np.arange(1,numcols):
+        new_col=np.interp(out_time,timecol,original_dt[:,crcol])
+        out_array[:,crcol]=new_col
+    redfilename=fname[:-3]+'red.txt'
+    np.savetxt(redfilename,out_array)
+    return redfilename
 def change_pickle(pickle_fname,param_name,new_param_value):
     params=open_pickle(pickle_fname)
     
