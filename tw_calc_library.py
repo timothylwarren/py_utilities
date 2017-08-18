@@ -820,8 +820,10 @@ def get_time(timestr,**kwargs):
     else:
         add_time=0
     #pdb.set_trace()
-    return 60*int(timestr[0:2])+int(timestr[2:4])+add_time
-    
+    try:
+        return 60*int(timestr[0:2])+int(timestr[2:4])+add_time
+    except:
+        pdb.set_trace()
 def convert_str_time_to_min(timestr):
     
     return 60*int(timestr[0:2])+int(timestr[2:4])

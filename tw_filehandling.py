@@ -25,11 +25,11 @@ def parse_date(fname):
     return date, fly, time
 
 def check_file_size(infile):
-    pdb.set_trace()
+    
     return os.stat(infile)[6]/1e6
 def make_reduced_txtfile(fname,target_sample_rate=200):
     #preserve nan values
-    pdb.set_trace()
+   
     original_dt=np.array(np.genfromtxt(fname))
     numcols=len(original_dt[0,:])
     timecol=original_dt[:,0]
@@ -37,11 +37,24 @@ def make_reduced_txtfile(fname,target_sample_rate=200):
     max_time=np.nanmax(timecol)
     out_time=np.arange(min_time,max_time,1./target_sample_rate)
     
-    
-
-           
-                
     new_time=np.interp(out_time,timecol,timecol)
+    #where were nanvls in original data
+    naninds=np.where(np.isnan(original_dt[:,0]))
+    nantime=[]
+    
+    for crind in naninds[0]:
+        nantime.append(original_dt[crind-1,0]) 
+
+    for crnantime in nantime:
+        tmdiff=new_time-crnantime
+        closest_ind=np.nanargmin(abs(tmdiff))
+        current_nan_inds=np.where(np.isnan(new_time))
+        if len(current_nan_inds[0]):
+            if np.min(abs(current_nan_inds-closest_ind))>10:
+                new_time[closest_ind]=np.nan
+        else:
+            new_time[closest_ind]=np.nan
+    
 
     #initialize_array
     out_array=np.zeros((len(new_time),numcols))
@@ -51,6 +64,7 @@ def make_reduced_txtfile(fname,target_sample_rate=200):
         out_array[:,crcol]=new_col
     redfilename=fname[:-3]+'red.txt'
     np.savetxt(redfilename,out_array)
+    
     return redfilename
 def change_pickle(pickle_fname,param_name,new_param_value):
     params=open_pickle(pickle_fname)
