@@ -501,8 +501,9 @@ def polar_heat_map(heat_data,ax=[],shift_vertical_flag=False,plot_colorbar_flag=
             plot_power_value=False
     else:
         plot_power_value=False
-   
+    
     try:
+        
         offset_vl=kwargs['offset_vl']
     except:
         offset_vl=np.pi/2
@@ -526,7 +527,8 @@ def polar_heat_map(heat_data,ax=[],shift_vertical_flag=False,plot_colorbar_flag=
         if not split_flag:
             clim=[0,np.max(heat_data[dat_type])]
         else:
-            clim=[0,np.max(heat_data['norm_heat_map_vls'][1])]
+            
+            clim=[0,0.7*np.max(heat_data['norm_heat_map_vls'][1])]
 
 
     #check if sum >1
@@ -1223,14 +1225,17 @@ def plot_transects(axin,ave_heatmap_data,**kwargs):
         crdt=ave_heatmap_data[dat_type]
         
    
-    if 'theta' not in kwargs:
+    #if 'theta' not in kwargs:
       
-        kwargs['theta']=ave_heatmap_data['theta']
+     #   kwargs['theta']=ave_heatmap_data['theta']
 
     if 'thetaedges' not in kwargs:
      
         kwargs['thetaedges']=ave_heatmap_data['thetaedges']
-
+    if 'redges' not in kwargs:
+        kwargs['redges']=ave_heatmap_data['redges']
+    
+    
 
     try:
         sector_rvl=kwargs['sector_rvl']
@@ -1257,8 +1262,6 @@ def plot_transects(axin,ave_heatmap_data,**kwargs):
     #for instance 72 r vls to make up whole space
     num_r_vls=np.shape(crdt)[0]
     
-    redges=ave_heatmap_data['redges']
-    
        
     #bnds=np.linspace(0,num_r_vls,number_of_sectors+1)-(num_r_vls/number_of_sectors)/2
     
@@ -1272,21 +1275,24 @@ def plot_transects(axin,ave_heatmap_data,**kwargs):
             plotdt=crdt[inds]
             pltax=axin[inds]
             if inds==0:
-                determine_and_plot_transects(pltax,plotdt,redges,ymax=0.04, **kwargs)
+                determine_and_plot_transects(pltax,plotdt,ymax=0.04, **kwargs)
             else:
-                determine_and_plot_transects(pltax,plotdt,redges,ymax=0.04,no_legend=True, **kwargs)
+                determine_and_plot_transects(pltax,plotdt,ymax=0.04,no_legend=True, **kwargs)
     else:
         plotdt=crdt
         pltax=axin
         
-        proportional_vls=determine_and_plot_transects(pltax,plotdt,redges,**kwargs)
+        proportional_vls=determine_and_plot_transects(pltax,plotdt,**kwargs)
         
     return proportional_vls
     #ax.grid()
 
 
-def determine_and_plot_transects(pltax,crdt,redges,theta,offset=0,transect_x_type='vector',**kwargs):
-    bnds=kwargs['bnds']
+def determine_and_plot_transects(pltax,crdt,offset=0,transect_x_type='vector',**kwargs):
+    try:
+        bnds=kwargs['bnds']
+    except:
+        bnds=[]
     proportional_vls={}
     try:
         colvls=kwargs['colvls']
@@ -1303,7 +1309,18 @@ def determine_and_plot_transects(pltax,crdt,redges,theta,offset=0,transect_x_typ
     except:
         no_legend=False
     
-    
+    [array_transect_vls,x_unsorted]=get_summed_vls(crdt,transect_x_type,**kwargs)
+    plot_summed_vls(pltax,array_transect_vls,transect_x_type,x_unsorted,**kwargs)
+    adjust_plotted_vls(pltax,transect_x_type,**kwargs)
+    return array_transect_vls
+
+def get_summed_vls(crdt,transect_x_type,bnds=[],split_flag=False,**kwargs):
+    try:
+        combine_bins=kwargs['combine_bins']
+    except:
+        combine_bins=False
+    redges=kwargs['redges']
+
     if transect_x_type=='vector':
 
         for crbnd in bnds:
@@ -1331,7 +1348,7 @@ def determine_and_plot_transects(pltax,crdt,redges,theta,offset=0,transect_x_typ
                 secondind=np.argmin(np.abs(redges-crbnd[1]))
                 summed_vls.append(np.sum(crdt[firstind:secondind+1,:],axis=0))
                 #plot sector
-                
+              
         array_transect_vls=np.array(summed_vls)
         xvls=kwargs['thetaedges']
         xvlsplt=np.append(xvls-xvls[0],1.0)
@@ -1341,24 +1358,65 @@ def determine_and_plot_transects(pltax,crdt,redges,theta,offset=0,transect_x_typ
         vec_thresh=kwargs['vec_threshold']
         vec_ind=np.min(np.where(kwargs['thetaedges']>=vec_thresh))
         
+
+
+        if not split_flag:
+            array_trans,xvlsplt=get_array_transect_vls(crdt,redges,vec_ind)
+            
+        else:
+            array_trans=[]
+            #pdb.set_trace()
+            #for crdtind in np.arange(2):
+            ind_to_plot=kwargs['ind_to_plot']  
+            try:
+                double_data_flag=kwargs['double_data_flag']
+            except:
+                double_data_flag=False
+            
+            tmp_array,xvlsplt=get_array_transect_vls(crdt[ind_to_plot],redges,vec_ind,double_data_flag,combine_bins=combine_bins)
+                
+            array_trans.append(tmp_array)
+             
+        initxvls=redges
         
-        summed_vls=np.sum(crdt[:,vec_ind:],axis=1)
+    return [array_trans,xvlsplt]
+
+
+def get_array_transect_vls(crdt,redges,vec_ind,double_data_flag,offset=[],combine_bins=True):
+    
+    summed_vls=np.sum(crdt[:,vec_ind:],axis=1)
         #assumes total width is 2*np.pi.
         #assumes taking 72 to 36 bins
-        array_transect_vls=[]
-        out_edges=[]
-        if offset:
-            ind_offset=np.where(redges==offset)[0][0]
-            new_edges=redges-offset
-            neg_inds=np.where(new_edges<0)
-            new_edges[neg_inds]=new_edges[neg_inds]+2*np.pi
-            xvlsplt=new_edges
+    array_transect_vls=[]
+    out_edges=[]
+    if offset:
+        ind_offset=np.where(redges==offset)[0][0]
+        new_edges=redges-offset
+        neg_inds=np.where(new_edges<0)
+        new_edges[neg_inds]=new_edges[neg_inds]+2*np.pi
+        xvlsplt=new_edges
+    else:
+        xvlsplt=redges
+    
+    if combine_bins:
         for crvl in np.linspace(0,70,36):
             
             array_transect_vls.append(summed_vls[crvl]+summed_vls[crvl+1])
-            
-        initxvls=redges
-        
+        x_unsorted=xvlsplt[0:-1:2]
+    else:
+        array_transect_vls=summed_vls
+        x_unsorted=xvlsplt
+    if double_data_flag:
+        len_transect=len(array_transect_vls)
+        first_dt=array_transect_vls[0:len_transect/2]
+        second_dt=array_transect_vls[len_transect/2:]
+
+        array_transect_vls_out=np.mean([first_dt,second_dt],axis=0)
+
+    
+    return array_transect_vls_out,x_unsorted
+
+def plot_summed_vls(pltax,array_transect_vls,transect_x_type,x_unsorted,split_flag=False,**kwargs):
     if transect_x_type=='vector':
 
         for crind,cr_row in enumerate(array_transect_vls):
@@ -1366,20 +1424,58 @@ def determine_and_plot_transects(pltax,crdt,redges,theta,offset=0,transect_x_typ
             yplt=np.append(cr_row,0)
             
             try:
-                pltax.step(xvlsplt[:-1],yplt,color=kwargs['transect_colvls'][crind],linewidth=0.5)
+                pltax.step(x_unsorted[:-1],yplt,color=kwargs['transect_colvls'][crind],linewidth=0.5)
             except:
                 pdb.set_trace()
             position=[1.1,.01+.005*crind]
             #strvl=legend_text[crind]
        
     elif transect_x_type == 'position':     
-        yplt=np.array(array_transect_vls)
+        if not split_flag:
+            yplt=np.array(array_transect_vls)
             
-        x_unsorted=xvlsplt[0:-1:2]
+            
         
-        sortinds=np.argsort(x_unsorted)
-        pltax.step(x_unsorted[sortinds],yplt[sortinds],color=kwargs['transect_colvls'][0],linewidth=0.5)
+            sortinds=np.argsort(x_unsorted)
+        
+            pltax.step(x_unsorted[sortinds],yplt[0][sortinds],color=kwargs['transect_colvls'],linewidth=0.5)
+        else:
+            #for crind in np.arange(2):
+            
+            yplt=np.array(array_transect_vls)
 
+            #x_unsorted=xvlsplt[0:-1:2]
+        
+            sortinds=np.argsort(x_unsorted)
+           
+            if kwargs['invert_transect_flag']:
+                yvls=yplt[0][::-1]
+
+            else:
+                yvls=yplt[0]    
+            if kwargs['double_data_flag']:
+                
+                pltx=x_unsorted[sortinds][0:len(yvls)+1]
+                plty=np.append(0,yvls)
+                
+                if kwargs['center_x_around_zero']:
+                    
+                    pltx=pltx-np.pi/2
+                    
+                    
+                    pltynew=np.append(plty[-9:],plty[1:-9])
+                    pltyfin=np.append(0,pltynew)
+                else:
+                    pltyfin=plty
+            else:
+                pltx=x_unsorted[sortinds]
+                pltyfin=yplt[0][sortinds]
+            
+            
+            
+            pltax.step(pltx,pltyfin,color=kwargs['transect_colvls'],linewidth=0.5,label='post')
+            
+def adjust_plotted_vls(pltax,transect_x_type,trans_x_label='heading', **kwargs):
     if transect_x_type=='vector':            
         fpl.adjust_spines(pltax,['left','bottom'])
         pltax.get_xaxis().set_ticks([0,1.0])
@@ -1398,12 +1494,32 @@ def determine_and_plot_transects(pltax,crdt,redges,theta,offset=0,transect_x_typ
         pltax.set_xlim([0,1])
     
     elif transect_x_type=='position': 
+        if kwargs['double_data_flag']:
+            if kwargs['center_x_around_zero']:
+               
+                xticks=[-np.pi/2,0,np.pi/2]
+                xvls=[-90,0,90]
+                xlim=[-np.pi/2,np.pi/2]
+
+                #pltx=pltx-np.pi/2
+            else:
+                xticks=[0,np.pi/2,np.pi]
+                xvls=[0,90,180]
+                xlim=[0,np.pi]
+            
+        else:
+            xticks=[0,np.pi,2*np.pi]
+            xvls=[0,360]
+            xlim=[0,2*np.pi]
+
         fpl.adjust_spines(pltax,['left','bottom'])
-        pltax.get_xaxis().set_ticks([0,np.pi,2*np.pi])
-        pltax.get_xaxis().set_ticklabels([0,180, 360],fontsize=5)
+        pltax.set_xlim(xlim)
+        pltax.get_xaxis().set_ticks(xticks)
+        pltax.get_xaxis().set_ticklabels(xvls,fontsize=5)
         pltax.get_yaxis().set_ticks([0,.01])
         pltax.get_yaxis().set_ticklabels([0,.01],fontsize=5)
-        pltax.set_xlabel('heading $^\circ$', fontsize=5,multialignment='center')
+        
+        pltax.set_xlabel(trans_x_label+' ($^\circ$)', fontsize=5,multialignment='center')
         #ax.yaxis.labelpad=-2
         pltax.xaxis.labelpad=0
         pltax.set_ylabel('probability',fontsize=5)
@@ -1414,7 +1530,7 @@ def determine_and_plot_transects(pltax,crdt,redges,theta,offset=0,transect_x_typ
 
     #ax.set_aspect(40)
         pltax.set_ylim([0,.01])
-    return array_transect_vls
+    
     #ax.get_yaxis().set_ticks(np.arange(0,ymax,0.01))
     #ax.get_yaxis().set_ticklabels(np.arange(0,ymax,0.01),fontsize=6)
     

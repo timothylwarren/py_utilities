@@ -135,7 +135,7 @@ def pad_vector_lists(indt):
     return timelst,veclst
 
 
-def plot_motor(indt,ax,withhold_bottom_axis=False,**kwargs):
+def plot_motor(indt,ax,withhold_bottom_axis=False,one_line_label=False,xlabelpad=-3,**kwargs):
     
     VERTVL=370
     if 'zoom_times' in kwargs:
@@ -275,10 +275,14 @@ def plot_motor(indt,ax,withhold_bottom_axis=False,**kwargs):
          #   ax.axis('off')
             #fpl.adjust_spines(ax,['left'])
     
-    
-    ax.get_yaxis().set_ticks([0,90,180,270,360])
-    ax.get_yaxis().set_ticklabels(['0','90','180','270','360'],fontsize=6)
-    ax.set_ylabel('polarizer\n($^\circ$)', fontsize=6)
+    if plot_left_axis:
+        ax.get_yaxis().set_ticks([0,90,180,270,360])
+        ax.get_yaxis().set_ticklabels(['0','90','180','270','360'],fontsize=6)
+        if one_line_label:
+            ylab='polarizer ($^\circ$)'
+        else:
+            ylab='polarizer\n($^\circ$)'
+        ax.set_ylabel(ylab, fontsize=6)
     
     if xtickflag:
         xticks=kwargs['xticks']
@@ -304,7 +308,7 @@ def plot_motor(indt,ax,withhold_bottom_axis=False,**kwargs):
     #pdb.set_trace()
     ax.set_xlim(xlim)
     #ax.set_aspect(0.005)
-    ax.xaxis.labelpad = -3
+    ax.xaxis.labelpad = xlabelpad
     ax.yaxis.labelpad= 1
     ax.set_ylim([0,360])
 

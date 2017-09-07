@@ -930,6 +930,18 @@ def realign_radial_data(rad_data,realign_vl):
     realigned_data=np.mod(offset_data,2*np.pi)
     return realigned_data
 
+def find_indices_of_one_array_in_other(large_array,array_to_place):
+
+
+
+    index = np.argsort(large_array)
+    sorted_x = large_array[index]
+    sorted_index = np.searchsorted(sorted_x, array_to_place)
+
+    return sorted_index
+
+
+
 def make_polarizer_fit_calculation(params,xvls,yvls):
     if 'filter_type' not in params:
         params['filter_type']='linear'
