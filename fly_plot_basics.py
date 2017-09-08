@@ -162,9 +162,9 @@ def plot_motor(indt,ax,withhold_bottom_axis=False,one_line_label=False,xlabelpad
     except:
         flag_360=0
     try:
-        offset_flag=kwargs['offset_value']
+        offset_to_subtract=kwargs['offset_value_to_subtract']
     except:
-        offset_flag=False
+        offset_to_subtract=0
 
     if 'plot_vertical' in kwargs:
         plot_vert_flag=1
@@ -226,11 +226,10 @@ def plot_motor(indt,ax,withhold_bottom_axis=False,one_line_label=False,xlabelpad
     
     
     
-    if offset_flag:
-        mot_rad=calc.deg_to_rad(mot_tmp)-kwargs['offset_value']
-        mot=calc.rad_to_deg(calc.standardize_angle(mot_rad,2*np.pi,force_positive=1))
-    else:
-        mot=mot_tmp
+    
+    mot_rad=calc.deg_to_rad(mot_tmp)-kwargs['offset_to_subtract']
+    mot=calc.rad_to_deg(calc.standardize_angle(mot_rad,2*np.pi,force_positive=1))
+   
     
     sub_plot_motor(ax,time,mot, **kwargs)
     
