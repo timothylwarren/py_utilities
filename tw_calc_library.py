@@ -547,8 +547,9 @@ def circ_mean(vls,**kwargs):
     
     else:
         rad_data=comb_raddata[~pylab.isnan(comb_raddata)]
-        mnout=circ.circmean(rad_data)
-        tmpvar=circ.circvar(rad_data)
+        mnout=circ.circmean(rad_data,**kwargs)
+        pdb.set_trace()
+        tmpvar=circ.circvar(rad_data,**kwargs)
 
     return rad_to_deg(mnout),tmpvar
 
@@ -557,7 +558,7 @@ def circ_mean(vls,**kwargs):
 
 
 
-#lost original weighted mean on Thursday 4/6...recover version prior to that.
+
 def weighted_mean(mnvls,edges,**kwargs):
     
     try:
@@ -569,32 +570,28 @@ def weighted_mean(mnvls,edges,**kwargs):
         anal_180_flag=kwargs['anal_180']
     except:
         anal_180_flag=False
-    pdb.set_trace()
-    bin_middles = (edges[:-1] + edges[1:]) / 2
+    
+    bin_middles = edges+edges[1]/2.
 
     if len(bin_middles)<len(mnvls):
-        bin_middles=mnvls
-
+        
+        bin_middles=np.append(bin_middles,bin_middles[-1]+bin_middles[1])
+    norm_mnvls=mnvls/sum(mnvls)
     veclist=[]
     
-    try:
-        for ind,crmnvl in enumerate(mnvls):
-            try:
-                veclist.append(bin_middles[ind]*crmnvl)
-            except:
-                pdb.set_trace()
-    except:
-        pdb.set_trace()
+    
+    # for ind,crmnvl in enumerate(norm_mnvls):
+    #     try:   
+    #         veclist.append(bin_middles[ind]*crmnvl)
+    #     except:
+    #         pdb.set_trace()
     
     if mean_type is 'circ':
-        if kwargs['anal_180']:
-            total_mean,total_var=circ_mean(np.array(veclist),anal_180=1)
-        else:
-            total_mean,total_var=circ_mean(np.array(veclist),anal_180=0)
-        #needs to be fixed
-        #pdb.set_trace()
-        return total_mean,total_var
+        
+        total_mean,total_var=circ_mean(np.array(bin_middles),weights=norm_mnvls,anal_180=anal_180_flag)
         pdb.set_trace()
+        return total_mean,total_var
+        
     else:
         
         return sum(veclist)

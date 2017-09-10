@@ -11,10 +11,13 @@ def circmean(alpha,axis=None, **kwargs):
     
     if 'weights' in kwargs:
         
-        wts=kwargs['weights']
-        mean_angle = np.arctan2(stats.nanmean(wts*np.sin(alpha),axis),stats.nanmean(wts*np.cos(alpha),axis))
+        vals_list=get_vec_list(alpha)
+        
+        N=len(vals_list)
+        mean_angle = np.arctan2(stats.nanmean(np.sin(vals_list),axis),stats.nanmean(np.cos(vals_list),axis))
     else:
         mean_angle = np.arctan2(stats.nanmean(np.sin(alpha),axis),stats.nanmean(np.cos(alpha),axis))
+    
     return mean_angle
     
 def circvar(alpha,axis=None,**kwargs):
@@ -26,16 +29,30 @@ def circvar(alpha,axis=None,**kwargs):
         else:
             N = alpha.shape[axis]
     
+    #this is accomplished in an inelegant manner,
+    #where I asemble 10,000 values proportioned according to the weights, and then compute.
     if 'weights' in kwargs:
         
-        wts=kwargs['weights']
-        R = np.sqrt(np.sum(wts*np.sin(alpha),axis)**2 + np.sum(wts*np.cos(alpha),axis)**2)/N
+
+        vals_list=get_vec_list(alpha)
+        
+        N=len(vals_list)
+        R = np.sqrt(np.sum(np.sin(vals_list),axis)**2 + np.sum(np.cos(vals_list),axis)**2)/N
     
     else:
         R = np.sqrt(np.sum(np.sin(alpha),axis)**2 + np.sum(np.cos(alpha),axis)**2)/N
     
     V = 1-R
     return V
+
+def get_vec_list(alpha):
+    nvls=1e4
+    vals_list=[]
+    for crind, cr_alpha in enumerate(alpha):
+        num_vls_to_add=np.round(kwargs['weights'][crind]*nvls)
+            
+        vals_list=np.append(vals_list,cr_alpha*np.ones(int(num_vls_to_add)))
+    return vals_list
 
 def circdiff(alpha,beta):
     D = np.arctan2(np.sin(alpha-beta),np.cos(alpha-beta))

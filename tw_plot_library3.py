@@ -502,14 +502,14 @@ def polar_heat_map(heat_data,ax=[],shift_vertical_flag=False,plot_colorbar_flag=
     else:
         plot_power_value=False
     
-    pdb.set_trace()
+    
     try:
         
-        offset_to_add=kwargs['offset_vl']
+        offset_to_add=kwargs['offset_to_add']
     except:
-        offset_to_add=np.pi/2
+        offset_to_add=0
   
-    
+   
     rmod, thetamod=np.meshgrid( thetaedges,redges)
     
     if plot_power_value:
@@ -518,10 +518,12 @@ def polar_heat_map(heat_data,ax=[],shift_vertical_flag=False,plot_colorbar_flag=
         rplot=rmod
     
     
-    
+   
     if shift_vertical_flag:
-        thetamod=thetamod+offset_vl
-        
+        thetamod=thetamod+np.pi/2
+    
+
+    thetamod=thetamod+offset_to_add    
         #kwargs['arc_positions']=kwargs['arc_positions']
     
     if calc_clim_flag:
@@ -1290,7 +1292,7 @@ def plot_transects(axin,ave_heatmap_data,**kwargs):
 
 
 def determine_and_plot_transects(pltax,crdt,offset=0,transect_x_type='vector',**kwargs):
-    pdb.set_trace()
+    
     try:
         bnds=kwargs['bnds']
     except:
@@ -1321,7 +1323,7 @@ def get_summed_vls(crdt,transect_x_type,bnds=[],split_flag=False,**kwargs):
         combine_bins=kwargs['combine_bins']
     except:
         combine_bins=False
-    redges=kwargs['redges']
+    #redges=kwargs['redges']
     summed_vls=[]
     if transect_x_type=='vector':
 
@@ -1364,9 +1366,9 @@ def get_summed_vls(crdt,transect_x_type,bnds=[],split_flag=False,**kwargs):
         vec_ind=np.min(np.where(kwargs['thetaedges']>=vec_thresh))
         
 
-        pdb.set_trace()
+       
         if not split_flag:
-            array_trans,xvlsplt=get_array_transect_vls(crdt,redges,vec_ind)
+            array_trans,xvlsplt=get_array_transect_vls(crdt,vec_ind,**kwargs)
             
         else:
             array_trans=[]
@@ -1377,26 +1379,28 @@ def get_summed_vls(crdt,transect_x_type,bnds=[],split_flag=False,**kwargs):
                 double_data_flag=kwargs['double_data_flag']
             except:
                 double_data_flag=False
-            pdb.set_trace()
+            
             tmp_array,xvlsplt=get_array_transect_vls(crdt[ind_to_plot],redges,vec_ind,double_data_flag=double_data_flag,combine_bins=combine_bins)
                 
             array_trans.append(tmp_array)
              
-        initxvls=redges
+        initxvls=kwargs['redges']
         
     return [array_trans,xvlsplt]
 
 
-def get_array_transect_vls(crdt,redges,vec_ind,double_data_flag=False,offset=[],combine_bins=True):
-    
+def get_array_transect_vls(crdt,vec_ind,double_data_flag=False,offset_to_add=[],combine_bins=True,**kwargs):
+    redges=kwargs['redges']
     summed_vls=np.sum(crdt[:,vec_ind:],axis=1)
         #assumes total width is 2*np.pi.
         #assumes taking 72 to 36 bins
     array_transect_vls=[]
     out_edges=[]
-    pdb.set_trace()
-
-    if offset:
+   
+    
+    if 'transect_offset_to_subtract' in kwargs:
+        
+        offset=2*np.pi-kwargs['transect_offset_to_subtract']
         ind_offset=np.where(redges==offset)[0][0]
         new_edges=redges-offset
         neg_inds=np.where(new_edges<0)
@@ -1439,7 +1443,7 @@ def plot_summed_vls(pltax,array_transect_vls,transect_x_type,x_unsorted,split_fl
             #strvl=legend_text[crind]
        
     elif transect_x_type == 'position':     
-        pdb.set_trace()
+        
         if not split_flag:
             yplt=np.array(array_transect_vls)
             
@@ -1450,6 +1454,11 @@ def plot_summed_vls(pltax,array_transect_vls,transect_x_type,x_unsorted,split_fl
                 pltax.step(x_unsorted[sortinds],yplt[0][sortinds],color=kwargs['transect_colvls'],linewidth=0.5)
             except:
                 pltax.step(x_unsorted[sortinds],yplt[sortinds],color=kwargs['transect_colvls'][0],linewidth=0.5)
+        
+
+            
+            mnvl,varvl=calc.weighted_mean(yplt[sortinds],x_unsorted[sortinds])
+            pdb.set_trace()
         else:
             #for crind in np.arange(2):
             
@@ -1548,7 +1557,7 @@ def adjust_plotted_vls(pltax,transect_x_type,double_data_flag=False,trans_x_labe
 
 
 def call_vector_plot(crax,vecdt,**kwargs):
-    pdb.set_trace()
+    
     flytype=kwargs['flytype']
     # if 'light' in flytype:
     #     self.excise_initial_time=True
@@ -1607,7 +1616,7 @@ def sub_make_vector_plot(cr_vecdt,crax,**kwargs):
     tm_to_plot=tm[inds]
     mn_to_plot=pltmean
     colct=kwargs['colct']
-    pdb.set_trace()
+    
     crax.plot(tm_to_plot,mn_to_plot,colors[np.mod(colct,4)],linewidth=0.5)
     
     if 'txt' in kwargs:
