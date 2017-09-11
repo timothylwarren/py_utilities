@@ -548,7 +548,7 @@ def circ_mean(vls,**kwargs):
     else:
         rad_data=comb_raddata[~pylab.isnan(comb_raddata)]
         mnout=circ.circmean(rad_data,**kwargs)
-        pdb.set_trace()
+        
         tmpvar=circ.circvar(rad_data,**kwargs)
 
     return rad_to_deg(mnout),tmpvar
@@ -589,7 +589,7 @@ def weighted_mean(mnvls,edges,**kwargs):
     if mean_type is 'circ':
         
         total_mean,total_var=circ_mean(np.array(bin_middles),weights=norm_mnvls,anal_180=anal_180_flag)
-        pdb.set_trace()
+        
         return total_mean,total_var
         
     else:

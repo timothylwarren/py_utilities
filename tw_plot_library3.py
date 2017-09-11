@@ -1458,7 +1458,7 @@ def plot_summed_vls(pltax,array_transect_vls,transect_x_type,x_unsorted,split_fl
 
             
             mnvl,varvl=calc.weighted_mean(yplt[sortinds],x_unsorted[sortinds])
-            pdb.set_trace()
+           
         else:
             #for crind in np.arange(2):
             
