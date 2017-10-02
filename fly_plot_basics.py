@@ -227,7 +227,7 @@ def plot_motor(indt,ax,withhold_bottom_axis=False,one_line_label=False,xlabelpad
     
     
     
-    mot_rad=calc.deg_to_rad(mot_tmp)-kwargs['offset_to_subtract']
+    mot_rad=calc.deg_to_rad(mot_tmp)-offset_to_subtract
     mot=calc.rad_to_deg(calc.standardize_angle(mot_rad,2*np.pi,force_positive=1))
    
     
