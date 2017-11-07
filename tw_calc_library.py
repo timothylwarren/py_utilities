@@ -664,6 +664,37 @@ def smooth(x,beta):
         y = np.convolve(w/w.sum(),s,mode='valid')
         return y[5:len(y)-5]    
     
+
+def exponential_fit_new(xdata,ydata):
+    # define a von-Mises fitting function: B + A exp(k cos(2(theta - phi)) -1)
+    # p[0] = B
+    # p[1] = A
+    # p[2] = k (1/D)
+    # p[3] = phi
+    
+    #fitfunc = lambda p, x: p[0] * np.exp( p[2]*( np.cos((x - p[1]))) )
+    errfunc = lambda p, x, y: fitfunc_exponential_asymptote(p,x)-y
+    
+    # set initial guess
+    start_vl=np.mean(ydata[0:100])
+    end_vl=np.mean(ydata[-100:])
+    p0 = [start_vl,end_vl-start_vl,5]
+    # fit
+    p1, success = scipy.optimize.leastsq(errfunc, p0[:],args=(xdata,ydata))
+    
+    #tw = (90./np.pi) * np.arccos(abs(1 + np.log((1.+np.exp(-2.*p1[2]))/2)/p1[2]) )
+    
+    return p1, fitfunc(p1,xdata),success
+
+def plot_exponential_fit(ax,p,minvl=0,maxvl=15,color='k'):
+    xvls=np.linspace(minvl,maxvl,1000)
+   
+    yvls=p[0] + p[1]* (1- np.exp( - xvls/ p[2]))
+    ax.plot(xvls,yvls,color=color,linewidth=0.5)
+def fitfunc_exponential_asymptote(p,x):
+    #if p[2]>0.5:
+    return p[0] + p[1]* (1- np.exp( - x/ p[2]))
+    #else:
     
 def cos_ls_fit(xvls,yvls,**kwargs): 
     from scipy import optimize

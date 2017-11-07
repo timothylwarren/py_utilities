@@ -567,7 +567,7 @@ def polar_heat_map(heat_data,ax=[],shift_vertical_flag=False,plot_colorbar_flag=
         
         add_arc_fxn(ax, plot_arc_flag,**kwargs)
         
-    
+    pdb.set_trace()
     if plot_colorbar_flag:
        
         cmap=pylab.get_cmap('hot')
