@@ -1131,7 +1131,15 @@ def plot_hist(axh,indata,**kwargs):
                     pltinds=np.where(np.cumsum(hist)<0.99)[0]
                     axh.step( (bins[:-1]+offset)[pltinds], np.cumsum(hist)[pltinds],color=COL,linewidth=linewidth )
                 else:
+                    
                     axh.step( bins, np.insert(hist,0,0),color=COL )
+                    
+                    if his_type is 'stepfilled':
+
+                        fill_between_steps(bins,np.insert(hist,0,0),h_align='right',color=COL,ax=axh)
+       
+
+
                     if repeat_pi_interval_flag:
                         axh.step(bins+np.pi,np.insert(hist,0,0),color=COL,linewidth=linewidth)
         #nvl, bins, patches = axh.hist(data[~np.isnan(data)], bins=bins,normed=normvl, histtype=his_type, color=COL, cumulative=cumulative_val,orientation=orient,linewidth=1)

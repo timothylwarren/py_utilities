@@ -143,7 +143,7 @@ def plot_motor(indt,ax,withhold_bottom_axis=False,one_line_label=False,xlabelpad
         
         mot_inds=self.calc_zoom_inds(kwargs['zoom_times'])
     else:
-       
+        
         mot_inds=np.arange(0,len(indt['time_in_min']))
         
 
@@ -152,10 +152,22 @@ def plot_motor(indt,ax,withhold_bottom_axis=False,one_line_label=False,xlabelpad
     plot_split_flag=0
     
     try:
+        subtract_zero_time_flag=kwargs['subtract_zero_time']
+    except:
+        subtract_zero_time_flag=True
+    try:
+        plot_vert_line_at_end=kwargs['plot_vert_line_at_end']
+    except:
+        plot_vert_line_at_end=False
+
+    try:
         mnvl=kwargs['plot_mean']
     except:
         mnvl=[]
-
+    try:
+        center_on_zero_flag=kwargs['center_on_zero_flag']
+    except:
+        center_on_zero_flag=False
 
     try:
         flag_360=kwargs['flag_360']
@@ -165,6 +177,10 @@ def plot_motor(indt,ax,withhold_bottom_axis=False,one_line_label=False,xlabelpad
         offset_to_subtract=kwargs['offset_value_to_subtract']
     except:
         offset_to_subtract=0
+    try:
+        halt_flag=kwargs['halt_flag']
+    except:
+        halt_flag=False
 
     if 'plot_vertical' in kwargs:
         plot_vert_flag=1
@@ -187,7 +203,7 @@ def plot_motor(indt,ax,withhold_bottom_axis=False,one_line_label=False,xlabelpad
     if 'xlim' in kwargs:
         xlim=kwargs['xlim']
     else:
-        xlim=[0,15]
+        xlim=[0,20]
     
     if 'plot_vector' in kwargs:
         if kwargs['plot_vector']:
@@ -211,6 +227,7 @@ def plot_motor(indt,ax,withhold_bottom_axis=False,one_line_label=False,xlabelpad
                             [startinds,stopinds]=calc.find_consecutive_values(inds[inds_thresh])
                             twplt.plot_horizontal_lines(ax,all_time_list[startinds],all_time_list[stopinds],VERTVL)
             except:
+                pdb.set_trace()
                 tst=1
             
     if 'plot_left_axis' in kwargs:
@@ -220,19 +237,29 @@ def plot_motor(indt,ax,withhold_bottom_axis=False,one_line_label=False,xlabelpad
         
     
     mot_tmp=indt['mot_deg'][mot_inds]
-    time=indt['time_in_min'][mot_inds]-indt['time_in_min'][0]
+    
+    if subtract_zero_time_flag:
+        time=indt['time_in_min'][mot_inds]-indt['time_in_min'][0]
+    else:
+        time=indt['time_in_min'][mot_inds]
 
     
     
     
-    
+    if halt_flag:
+        pdb.set_trace()
     
     mot_rad=calc.deg_to_rad(mot_tmp)-offset_to_subtract
-    mot=calc.rad_to_deg(calc.standardize_angle(mot_rad,2*np.pi,force_positive=1))
-   
-    
+    mot_tmp=calc.rad_to_deg(calc.standardize_angle(mot_rad,2*np.pi,force_positive=1))
+    if center_on_zero_flag:
+        mot=calc.center_deg_on_zero(mot_tmp)
+        
+    else:
+        mot=mot_tmp        
     sub_plot_motor(ax,time,mot, **kwargs)
-    
+    if plot_vert_line_at_end:
+        
+        ax.plot([time[-1],time[-1]],[0,360],'b--')
    
     if mnvl:
        
@@ -275,8 +302,14 @@ def plot_motor(indt,ax,withhold_bottom_axis=False,one_line_label=False,xlabelpad
             #fpl.adjust_spines(ax,['left'])
     
     if plot_left_axis:
-        ax.get_yaxis().set_ticks([0,90,180,270,360])
-        ax.get_yaxis().set_ticklabels(['0','90','180','270','360'],fontsize=6)
+        if center_on_zero_flag:
+            ax.get_yaxis().set_ticks([-180,0,180])
+            ax.get_yaxis().set_ticklabels(['-180','0','180'],fontsize=6)
+            ax.set_ylim([-180,180])
+        else:
+            ax.get_yaxis().set_ticks([0,90,180,270,360])
+            ax.get_yaxis().set_ticklabels(['0','90','180','270','360'],fontsize=6)
+            ax.set_ylim([0,360])
         if one_line_label:
             ylab='polarizer ($^\circ$)'
         else:
@@ -309,7 +342,7 @@ def plot_motor(indt,ax,withhold_bottom_axis=False,one_line_label=False,xlabelpad
     #ax.set_aspect(0.005)
     ax.xaxis.labelpad = xlabelpad
     ax.yaxis.labelpad= 1
-    ax.set_ylim([0,360])
+    
 
 ##
 #This function plots position values in a manner that removes artefactual lines from data wrapping around
@@ -323,7 +356,7 @@ def sub_plot_motor(ax,time,mot,linewidth=0.5,**kwargs):
     try:
         max_allowed_difference=kwargs['max_allowed_difference']
     except:
-        max_allowed_difference=200
+        max_allowed_difference=50
     try:
         plot_flag=kwargs['plot_flag']
     except:
@@ -343,14 +376,15 @@ def sub_plot_motor(ax,time,mot,linewidth=0.5,**kwargs):
     #this outputs an array of arrays, which will be plotted
     mot_split_array=np.array_split(mot,breakinds+1)
     time_split_array=np.array_split(time,breakinds+1)
-    
+   
     #loops through the arrays to plot each value
     if plot_flag:
         for crind,crmot_splitinds in enumerate(mot_split_array):
             if np.size(crmot_splitinds):
-                
-                ax.plot(time_split_array[crind],crmot_splitinds,color=col,linewidth=linewidth)
-            
+                if len(crmot_splitinds>3):
+                    ax.plot(time_split_array[crind],crmot_splitinds,color=col,linewidth=linewidth)
+                else:
+                    pdb.set_trace()
     return time_split_array, mot_split_array
 
 

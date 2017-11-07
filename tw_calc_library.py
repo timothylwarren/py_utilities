@@ -869,7 +869,14 @@ def standardize_angle(input_angle,mod_angle,**kwargs):
                 output_angle=output_angle+180.0
     
     return output_angle
-    
+
+#assumes input between 0 and 360 - maps to -180,180    
+def center_deg_on_zero(invls):
+    inds=np.where(invls>180)
+    outvls=invls
+    outvls[inds]=-(360-invls[inds])
+   
+    return outvls
 def calculate_offset(mot,light,sensor_offset):
            
     xvls=2*np.pi*np.mod(mot,stepsPerRotation)/stepsPerRotation
