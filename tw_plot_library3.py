@@ -106,6 +106,10 @@ def scatterplot(ax,xvl,yvl,sizefactor=0.3,**kwargs):
         ellipse_flag=False
 
     try:
+        rasterize=kwargs['rasterize']
+    except:
+        rasterize=False
+    try:
         plot_error_bar=kwargs['plot_error_bar']
     except:
         plot_error_bar=False
@@ -149,8 +153,8 @@ def scatterplot(ax,xvl,yvl,sizefactor=0.3,**kwargs):
 
     if dynamic_sizes:
        
-        xdyn=np.array(dyn_sizes)[:,0]
-        ydyn=np.array(dyn_sizes)[:,1]
+        xdyn=np.array(dyn_sizes[0])
+        ydyn=np.array(dyn_sizes[1])
     else:
         
         s=7
@@ -173,16 +177,30 @@ def scatterplot(ax,xvl,yvl,sizefactor=0.3,**kwargs):
 
     else:
         #ax.scatter(arena_stats['ommatidiaAzimuths']*180/np.pi,arena_stats['ommatidiaElevations']*180/np.pi,color='k',s=0.3)
-       
-        ax.scatter(np.array(xvl), np.array(yvl),  edgecolor='k',facecolor='k',s=sizefactor,alpha=0.5,clip_on=False)
-        #pdb.set_trace()
-        if double_horizontal_ax:
-            ax.scatter(np.array(xvl)+180, np.array(yvl), edgecolor='k',facecolor='k', s=sizefactor,alpha=0.5,clip_on=False)
-        
-        if plot_error_bar:
-            ax.errorbar(x=np.array(xvl),y=np.array(yvl),yerr=ydyn*error_scale_factor,xerr=xdyn*error_scale_factor,fmt=None, ecolor=[0.6,0.6,0.6], alpha=0.5,capsize=0, zorder=5)
+        if not rasterize:
+            #ax.scatter(np.array(xvl), np.array(yvl),  edgecolor='k',facecolor='k',s=sizefactor,alpha=0.5,clip_on=False)
+            ax.scatter(np.array(xvl), np.array(yvl), c='k',s=sizefactor,clip_on=False)
 
-            ax.errorbar(x=np.array(xvl)+180,y=np.array(yvl),yerr=ydyn*error_scale_factor,xerr=xdyn*error_scale_factor,fmt=None, alpha=0.5,ecolor=[.6, .6, .6], capsize=0, zorder=5)
+            if double_horizontal_ax:
+                #ax.scatter(np.array(xvl)+180, np.array(yvl), edgecolor='k',facecolor='k', s=sizefactor,alpha=0.5,clip_on=False)
+                ax.scatter(np.array(xvl)+180, np.array(yvl),c='k', s=sizefactor,clip_on=False)
+
+        else:
+            #ax.plot(np.array(xvl), np.array(yvl),'o',markeredgecolor='k',markerfacecolor='k',markersize=sizefactor,rasterized=True,clip_on=False)
+            ax.plot(np.array(xvl), np.array(yvl),'o',markeredgecolor='k',markerfacecolor='k',markersize=sizefactor,rasterized=True,clip_on=False)
+
+            if double_horizontal_ax:
+                ax.plot(np.array(xvl)+180, np.array(yvl),'o',markeredgecolor='k',markerfacecolor='k',markersize=sizefactor,rasterized=True,clip_on=False)
+
+        if plot_error_bar:
+            #pylab.sca(ax)
+            ax.errorbar(x=np.array(xvl),y=np.array(yvl),yerr=ydyn*error_scale_factor,xerr=xdyn*error_scale_factor,fmt=None, ecolor=[0.6,0.6,0.6], alpha=0.5,capsize=0, zorder=5)
+            
+            #for b in e[1]:
+             #   b.set_clip_on(False)
+
+            if double_horizontal_ax:
+                ax.errorbar(x=np.array(xvl)+180,y=np.array(yvl),yerr=ydyn*error_scale_factor,xerr=xdyn*error_scale_factor,fmt=None, alpha=0.5,ecolor=[.6, .6, .6], capsize=0, zorder=5)
     if set_axes:
         if long_ax:
             ax.set_xlim(6, 21)
@@ -567,7 +585,7 @@ def polar_heat_map(heat_data,ax=[],shift_vertical_flag=False,plot_colorbar_flag=
         
         add_arc_fxn(ax, plot_arc_flag,**kwargs)
         
-    pdb.set_trace()
+    
     if plot_colorbar_flag:
        
         cmap=pylab.get_cmap('hot')
@@ -1286,10 +1304,17 @@ def plot_transects(axin,ave_heatmap_data,**kwargs):
         for inds in [0,1]:
             plotdt=crdt[inds]
             pltax=axin[inds]
+            try:
+                ybnds=kwargs['transect_y_bnds'][inds]
+            except:
+                ybnds=[0,0.03]
+
             if inds==0:
-                determine_and_plot_transects(pltax,plotdt,ymax=0.04, **kwargs)
+                determine_and_plot_transects(pltax,plotdt,ymax=0.04, ybnds=ybnds, **kwargs)
             else:
-                determine_and_plot_transects(pltax,plotdt,ymax=0.04,no_legend=True, **kwargs)
+                
+                determine_and_plot_transects(pltax,plotdt,ymax=0.04,no_legend=True,ybnds=ybnds, **kwargs)
+        proportional_vls=[]
     else:
         plotdt=crdt
         pltax=axin
@@ -1450,7 +1475,7 @@ def plot_summed_vls(pltax,array_transect_vls,transect_x_type,x_unsorted,split_fl
                 
                 pltax.step(x_unsorted,cr_row,color=kwargs['transect_colvls'][crind],linewidth=0.5)
             except:
-                pdb.set_trace()
+                tst=1
             
             position=[1.1,.01+.005*crind]
             #strvl=legend_text[crind]
@@ -1513,12 +1538,18 @@ def adjust_plotted_vls(pltax,transect_x_type,double_data_flag=False,trans_x_labe
         cr_fontsize=kwargs['fontsize']
     except:
         cr_fontsize=5
+
+    try:
+        ybnds=kwargs['ybnds']
+    except:
+        ybnds=[0,0.03]
     if transect_x_type=='vector':            
         fpl.adjust_spines(pltax,['left','bottom'])
         pltax.get_xaxis().set_ticks([0,1.0])
         pltax.get_xaxis().set_ticklabels([0,1],fontsize=cr_fontsize)
-        pltax.get_yaxis().set_ticks([0,.03])
-        pltax.get_yaxis().set_ticklabels([0,.03],fontsize=cr_fontsize)
+        
+        pltax.get_yaxis().set_ticks(ybnds)
+        pltax.get_yaxis().set_ticklabels(ybnds,fontsize=cr_fontsize)
         pltax.set_xlabel('local\nvector strength', fontsize=cr_fontsize,multialignment='center')
         #ax.yaxis.labelpad=-2
         #pltax.xaxis.labelpad=0
@@ -1529,6 +1560,7 @@ def adjust_plotted_vls(pltax,transect_x_type,double_data_flag=False,trans_x_labe
         #mpl.rcParams['xtick.major.size'] = 10
         #mpl.rcParams['xtick.major.width'] = 1
         pltax.set_xlim([0,1])
+        pltax.set_ylim(ybnds)
     
     elif transect_x_type=='position': 
         if double_data_flag:

@@ -134,6 +134,52 @@ def pad_vector_lists(indt):
     veclst=np.concatenate([np.zeros(len(init_time_vls)),np.array(indt['len_vector_lst']),np.zeros(len(end_time_vls))])
     return timelst,veclst
 
+def make_raw_plot(crdt,axmotor, axhist):
+
+        #COLNUM=-1
+
+        
+    TIME_GAP=5            
+
+    for cr_fltnum in crdt.keys():
+
+        if crdt[cr_fltnum]:
+
+            mnvl_in_rad=crdt[cr_fltnum]['mnrad_360']
+            halt_flag=False
+                    
+            offset_time=0
+            if cr_fltnum==1:
+                offset_time=crdt[cr_fltnum-1]['time_in_min'][-1]
+            elif cr_fltnum>1:
+                offset_time=crdt[cr_fltnum-1]['time_in_min'][-1]-TIME_GAP
+                    
+            plot_motor(crdt[cr_fltnum],axmotor,plot_vector=False,plot_split=1,plot_start_angle=0,subtract_zero_time=True,offset_time=offset_time,plot_vert_line_at_end=True, halt_flag=halt_flag)
+                    
+            axmotor.set_xlim([0,15.5])
+
+                    #if COLNUM:
+
+                     #   axmotor[crkey][flyindnum][COLNUM].axis('off')
+                      #  axhist[crkey][flyindnum][COLNUM].axis('off')
+
+            try:
+                crax=axhist[cr_fltnum]
+            except:
+                pdb.set_trace()
+            
+            crax.step(crdt[cr_fltnum]['normhst'],crdt[cr_fltnum]['xrad'][0:-1]+crdt[cr_fltnum]['rad_per_bin']/2,'k',linewidth=1)
+                    #self.col_num[crkey]=self.col_num[crkey]+1
+            fpl.adjust_spines(crax,[])
+            crax.set_ylim([-calc.deg_to_rad(0.),calc.deg_to_rad(360.0)])
+            crax.plot(0.21,mnvl_in_rad,'r<')
+            crax.set_xlim([0,0.24])
+
+   
+
+
+
+
 
 def plot_motor(indt,ax,withhold_bottom_axis=False,one_line_label=False,xlabelpad=-3,**kwargs):
     
@@ -182,6 +228,10 @@ def plot_motor(indt,ax,withhold_bottom_axis=False,one_line_label=False,xlabelpad
     except:
         halt_flag=False
 
+    try:
+        offset_time=kwargs['offset_time']
+    except:
+        offset_time=0
     if 'plot_vertical' in kwargs:
         plot_vert_flag=1
     else:
@@ -233,7 +283,7 @@ def plot_motor(indt,ax,withhold_bottom_axis=False,one_line_label=False,xlabelpad
     if 'plot_left_axis' in kwargs:
         plot_left_axis=kwargs['plot_left_axis']
     else:
-        plot_left_axis=1
+        plot_left_axis=True
         
     
     mot_tmp=indt['mot_deg'][mot_inds]
@@ -243,7 +293,8 @@ def plot_motor(indt,ax,withhold_bottom_axis=False,one_line_label=False,xlabelpad
     else:
         time=indt['time_in_min'][mot_inds]
 
-    
+    if offset_time:
+        time=time+offset_time
     
     
     if halt_flag:
@@ -259,7 +310,7 @@ def plot_motor(indt,ax,withhold_bottom_axis=False,one_line_label=False,xlabelpad
     sub_plot_motor(ax,time,mot, **kwargs)
     if plot_vert_line_at_end:
         
-        ax.plot([time[-1],time[-1]],[0,360],'b--')
+        ax.plot([time[-1],time[-1]],[0,360],'b',linewidth=0.5)
    
     if mnvl:
        
@@ -491,8 +542,8 @@ def make_heat_map(ax,heatdt,**kwargs):
     if plot_transect_flag:
         base_bnds=np.array([-np.pi/9, np.pi/9])
         bnd_sectors=[base_bnds, base_bnds+np.pi/2, base_bnds+2*np.pi/2, base_bnds+3*np.pi/2]
-
-        twplt.plot_transects(transect_ax,cr_heatmap_data,ax_schematic=ax_schematic,bnds=bnd_sectors,**kwargs)
+        if transect_ax:
+            twplt.plot_transects(transect_ax,cr_heatmap_data,ax_schematic=ax_schematic,bnds=bnd_sectors,**kwargs)
 
 
 
