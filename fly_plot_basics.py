@@ -339,7 +339,9 @@ def plot_motor(indt,ax,withhold_bottom_axis=False,one_line_label=False,xlabelpad
     if plot_left_axis:
         fpl.adjust_spines(ax,['left','bottom'])
     
-    elif withhold_bottom_axis:
+    
+    
+    if withhold_bottom_axis:
         fpl.adjust_spines(ax,['left'])
         ax.get_xaxis().set_ticklabels([],fontsize=6)
 
