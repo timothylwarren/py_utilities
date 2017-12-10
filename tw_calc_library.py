@@ -23,22 +23,26 @@ def permute_test_for_mean_diff_between_two_groups(dat1, dat2, num_permutations=1
     len_dat2=len(dat2)
     diff_list=[]
     for cr_permutation in np.arange(num_permutations):
-        tmptst=dat1+dat2
+        if type(dat1) is np.ndarray:
+
+            tmptst=np.concatenate((dat1,dat2))
+        else:
+            tmptst=dat1+dat2
         npr.shuffle(tmptst)
         diff_list.append(np.mean(tmptst[0:len_dat1])-np.mean(tmptst[len_dat1:]))
-    
+
     return diff_list
 
 def calc_offset_hist(indt,offset_value):
     mot_inds=np.arange(0,len(indt['time_in_min']))
-    
+
     tmp_mot_rad=indt['mot_rad'][mot_inds]
 
     mot_rad=tmp_mot_rad-offset_value
     crdeg=rad_to_deg(standardize_angle(mot_rad,2*np.pi,force_positive=1))
     deg_per_bin=10
-    degbins = np.arange(0,370,deg_per_bin)           
-                
+    degbins = np.arange(0,370,deg_per_bin)
+
     hstout_dt=make_hist_calculations(crdeg,degbins)
     return hstout_dt
 def heat_map_relative_weights(heatmap,rvalues):
@@ -46,8 +50,8 @@ def heat_map_relative_weights(heatmap,rvalues):
     #90,270
     supra_270=np.where(rvalues>=3*np.pi/2)
     sub_90=np.where(rvalues<=np.pi/2)
-    
-    
+
+
     middle=np.intersect1d(np.where(rvalues>=np.pi/2)[0],np.where(rvalues<3*np.pi/2)[0])
     ratio=[]
     for crht in heatmap:
@@ -122,20 +126,20 @@ def make_histogram_confidence_intervals(indata,bnds,num_bins):
     sumhist=[]
     for crind in np.arange(1000):
         axh=[]
-        
+
         dat=np.reshape(indata,len(indata))
         crdt=np.random.choice(dat,len(dat),replace=True)
-        
+
         bins=np.linspace(bnds[0],bnds[1],num_bins+1)
         inarray=indata[~np.isnan(indata)]
         weights = np.ones_like(inarray)/len(inarray)
 
-    
+
         hist, bins = np.histogram(crdt[~np.isnan(crdt)], bins=bins, weights=weights)
 
 
 
-        
+
         sumhist.append(hist)
     #calculate hist confidence intervals
     return bins,np.percentile(sumhist,2.5,axis=0),np.percentile(sumhist,97.5,axis=0)
@@ -149,7 +153,7 @@ def bin_ndarray(ndarray, new_shape, operation='sum'):
     Bins an ndarray in all axes based on the target shape, by summing or
         averaging.
 
-    Number of output dimensions must match number of input dimensions and 
+    Number of output dimensions must match number of input dimensions and
         new axes must divide old ones.
 
     Example
@@ -168,7 +172,7 @@ def bin_ndarray(ndarray, new_shape, operation='sum'):
     if type(ndarray) is list:
         out_vl=[]
         for cr_array in ndarray:
-            
+
             out_vl.append(compute_bins(cr_array,new_shape,operation))
 
     else:
@@ -198,7 +202,7 @@ def nanmean_matrix(indata,**kwargs):
         ax=kwargs['axis']
     except:
         ax=0
-   
+
     mdat=np.ma.masked_array(indata,np.isnan(indata))
     mm=np.mean(mdat,axis=ax)
     return mm
@@ -208,20 +212,20 @@ def nanmedian_matrix(indata,**kwargs):
         ax=kwargs['axis']
     except:
         ax=0
-   
+
     mdat=np.ma.masked_array(indata,np.isnan(indata))
-    
+
     mm=np.median(mdat,axis=ax)
     return mm
 
 def steppify(arr,isX=False,interval=0):
-    
+
     if isX and interval==0:
         newlist=[]
         for crind in np.arange(len(arr)):
             for k in [0,1]:
                 newlist.append(arr[crind])
-        
+
         return np.array(newlist[0:-1])
     else:
         newlist=[]
@@ -236,11 +240,11 @@ def nanstd_matrix(indata,**kwargs):
         ax=kwargs['axis']
     except:
         ax=0
-   
+
     mdat=np.ma.masked_array(indata,np.isnan(indata))
     mm=np.std(mdat,axis=ax)
     return mm
-    
+
 def intersection(first, *others):
     return set(first).intersection(*others)
 
@@ -258,11 +262,11 @@ def downsample(iny,ratio,**kwargs):
     if 'method' in kwargs:
         if kwargs['method'] is 'chunk':
             outvls=[]
-            
+
             if ratio>1:
                 inds=np.arange(0,len(iny),ratio)
                 for i in np.arange(len(inds)-1):
-                    
+
                     crvls=np.array(iny[inds[i]:inds[i+1]])
                     nonaninds=np.where(np.isnan(crvls)==0)
                     try:
@@ -280,24 +284,24 @@ def downsample(iny,ratio,**kwargs):
             return circ.circmean(iny_padded.reshape(-1,ratio),axis=1)
         else:
             return scipy.nanmean(iny_padded.reshape(-1,ratio),axis=1)
-        
+
 def get_dynamic_vec_strength(mot_dt,time_dt,calculation_type,vec_calc_type,filter_len_in_sec,**kwargs):
     if time_dt.size==0:
         return
-    
-    
+
+
     total_time=time_dt[-1]*60.
-    
+
     datalen=len(time_dt)
     sample_rate=datalen/total_time
     filter_len_in_pts=filter_len_in_sec*sample_rate
     gaussian_wts=make_gaussian_weights(filter_len_in_pts,normalize_type='sum')
-    
-    
+
+
     if calculation_type is 'convolution':
             #for variance, first perform convolution
             #of sin and cos with gaussian
-        
+
             #allvls=np.convolve(crdt['mot_rad'],gaussian_wts,mode='valid')
         if vec_calc_type=='360':
             sinvls=np.convolve(np.sin(mot_dt),gaussian_wts,mode='valid')
@@ -306,17 +310,17 @@ def get_dynamic_vec_strength(mot_dt,time_dt,calculation_type,vec_calc_type,filte
             sinvls=np.convolve(np.sin(2.0*mot_dt),gaussian_wts,mode='valid')
             cosvls=np.convolve(np.cos(2.0*mot_dt),gaussian_wts,mode='valid')
         vec_time_list=np.convolve(time_dt,gaussian_wts,mode='valid')
-            
+
         R = np.sqrt(sinvls**2 + cosvls**2)
         lenlst=R
-            
+
         mn_lst=np.arctan2(sinvls,cosvls)
-        
+
         return lenlst,mn_lst,vec_time_list
-            
+
             #mn_dot_product=np.mean(np.abs(np.cos(allvls-crdt['mnrad'])))
-        
-        
+
+
     elif calculation_type is 'sliding_window':
         end_data_vl=datalen-filter_len_in_pts
         STEP_LEN_IN_SEC=0.1
@@ -326,22 +330,22 @@ def get_dynamic_vec_strength(mot_dt,time_dt,calculation_type,vec_calc_type,filte
         lenlst=[]
         vec_time_list=[]
         for crvl in vector_vls:
-            
+
             heading_data=crdt['mot_rad'][crvl:crvl+filter_len_in_pts]
-            
+
             vec_time_list.append(np.mean(crdt['time_in_min'][crvl:crvl+filter_len_in_pts]))
             doubled_data=np.mod(2*heading_data,2*np.pi)
             gaussian_weights=make_gaussian_weights(len(heading_data),normalize_type='mean')
-                
+
             mn_lst.append(circ.circmean(heading_data,weights=gaussian_weights))
                 #modified to use heading_data, not doubled_data for vector strength
             lenlst.append(1-circ.circvar(heading_data,weights=gaussian_weights))
-                
+
             #mn_dot_product.append(np.mean(np.abs(np.cos(heading_data-crdt['mnrad']))))
         return lenlst,mn_lst,vec_time_list
 #set to have a sum of 1
 
-#idea here is to calculate confidence interval 
+#idea here is to calculate confidence interval
 #simple way to do this is resample with replacement
 #1000 times to get smooth distribution
 def resample_for_threshold(indata,**kwargs):
@@ -356,19 +360,19 @@ def make_gaussian_weights(numpts,**kwargs):
     tmp_weights=sig.get_window(('gaussian',numpts/6.),numpts)
     #sum of weights is 1
     if kwargs['normalize_type']=='sum':
-        return tmp_weights/np.sum(tmp_weights)        
+        return tmp_weights/np.sum(tmp_weights)
     elif kwargs['normalize_type']=='mean':
         return tmp_weights/np.mean(tmp_weights)
-        
-        
+
+
 def bootstrap(x,**kwargs):
     """Returns bootstrap estimate of 100.0*(1-alpha) CI for statistic."""
-    
+
     # dat=np.array(data)
     # n_vl = len(dat)
     # idx = npr.randint(0, n_vl, (num_samples, n_vl))
     # samples = dat[idx]
-    
+
     # stat = np.sort(np.max(samples, 1))
     # return (stat[int((alpha/2.0)*num_samples)],stat[int((1-alpha/2.0)*num_samples)])
     try:
@@ -398,10 +402,10 @@ def make_forward_trajectory(input_headings, **kwargs):
     	input_headings=2.*input_headings
     elif kwargs['calc_type'] is 'mod180':
     	input_headings=np.mod(input_headings,np.pi)
-    
+
     cr_position['x']=np.cumsum(np.cos(input_headings))
     cr_position['y']=np.cumsum(np.sin(input_headings))
-    
+
     return cr_position
 
 def vector_addition(pos1,pos2,**kwargs):
@@ -426,25 +430,25 @@ def rotate_xy_by_angle(inx,iny,shift_heading):
 
 def linear_to_polar(input_pos):
     output_pos={}
-    
+
     if type(input_pos['x']) is list:
         for key in ['theta','len']:
             output_pos[key]=[]
         for crind in np.arange(len(input_pos['x'])):
             output_pos['theta'].append(np.arctan2(input_pos['y'][crind],input_pos['x'][crind]))
             output_pos['len'].append(np.sqrt(input_pos['x'][crind]**2+input_pos['y'][crind]**2))
-    else:    
-        
+    else:
+
         output_pos['theta']=np.arctan2(input_pos['y'],input_pos['x'])
         output_pos['len']=np.sqrt(input_pos['x']**2+input_pos['y']**2)
     return output_pos
-    
+
 def polar_to_linear(input_pos):
     output_pos={}
     output_pos['x']=input_pos['len']*np.cos(input_pos['theta'])
     output_pos['y']=input_pos['len']*np.sin(input_pos['theta'])
     return output_pos
-    
+
 def deg_to_rad(degree_vl):
     return np.array(degree_vl)*(2*np.pi)/360
 
@@ -478,21 +482,21 @@ def force_angle_to_range(input_angle,**kwargs):
         neginds=np.where(mod_angle<0)[0]
         mod_angle[neginds]=np.mod(input_angle,-np.pi)
         mod_angle=abs(mod_angle)
-        
+
 
     return mod_angle
 
 def get_2darray(input_dt):
     numrow=len(input_dt)
     numcol=len(input_dt[0])
-    
+
     output_array=np.zeros((numrow,numcol))
     for ind,cr_row in enumerate(input_dt):
         output_array[ind]=cr_row
     return output_array
-        
 
-    
+
+
 def make_hist_calculations(crdeg,degbins):
         out_dt={}
         comb_raddata=deg_to_rad(crdeg)
@@ -500,14 +504,14 @@ def make_hist_calculations(crdeg,degbins):
         out_dt['normhst']=histout[0]/float(sum(histout[0]))
         rad_data=comb_raddata[~pylab.isnan(comb_raddata)]
         doubled_rad_data=np.mod(2*rad_data,2*np.pi)
-        
+
         tmpmean=circ.circmean(doubled_rad_data)/2
-        
+
         out_dt['circvar']=(circ.circvar(2*rad_data))
         out_dt['circvar_mod360']=circ.circvar(rad_data)
-       
+
         tmp360mean=circ.circmean(rad_data)
-        
+
         if tmpmean<0:
             out_dt['mnrad']=np.pi+tmpmean
         else:
@@ -516,14 +520,14 @@ def make_hist_calculations(crdeg,degbins):
             out_dt['mnrad_360']=tmp360mean+2*np.pi
         else:
             out_dt['mnrad_360']=tmp360mean
-            
+
         if np.abs(out_dt['mnrad']-out_dt['mnrad_360'])>(np.pi/2):
             out_dt['mnrad_max180']=out_dt['mnrad']+np.pi
         else:
             out_dt['mnrad_max180']=out_dt['mnrad']
         if out_dt['mnrad_360']<0:
             pdb.set_trace()
-        
+
         return out_dt
 #refactor by making above function call this one
 def circ_mean(vls,**kwargs):
@@ -535,7 +539,7 @@ def circ_mean(vls,**kwargs):
             anal_180_flag=False
     else:
         anal_180_flag=False
-    if anal_180_flag:    
+    if anal_180_flag:
         rad_data=comb_raddata[~pylab.isnan(comb_raddata)]
         doubled_rad_data=np.mod(2*rad_data,2*np.pi)
         tmpmean=circ.circmean(doubled_rad_data)/2
@@ -544,11 +548,11 @@ def circ_mean(vls,**kwargs):
         else:
             mnout=tmpmean
         tmpvar=circ.circvar(2*rad_data)
-    
+
     else:
         rad_data=comb_raddata[~pylab.isnan(comb_raddata)]
         mnout=circ.circmean(rad_data,**kwargs)
-        
+
         tmpvar=circ.circvar(rad_data,**kwargs)
 
     return rad_to_deg(mnout),tmpvar
@@ -560,7 +564,7 @@ def circ_mean(vls,**kwargs):
 
 
 def weighted_mean(mnvls,edges,**kwargs):
-    
+
     try:
         mean_type=kwargs['mn_type']
     except:
@@ -570,36 +574,36 @@ def weighted_mean(mnvls,edges,**kwargs):
         anal_180_flag=kwargs['anal_180']
     except:
         anal_180_flag=False
-    
+
     bin_middles = edges+edges[1]/2.
 
     if len(bin_middles)<len(mnvls):
-        
+
         bin_middles=np.append(bin_middles,bin_middles[-1]+bin_middles[1])
     norm_mnvls=mnvls/sum(mnvls)
     veclist=[]
-    
-    
+
+
     # for ind,crmnvl in enumerate(norm_mnvls):
-    #     try:   
+    #     try:
     #         veclist.append(bin_middles[ind]*crmnvl)
     #     except:
     #         pdb.set_trace()
-    
+
     if mean_type is 'circ':
-        
+
         total_mean,total_var=circ_mean(np.array(bin_middles),weights=norm_mnvls,anal_180=anal_180_flag)
-        
+
         return total_mean,total_var
-        
+
     else:
-        
+
         return sum(veclist)
-        
-    
+
+
 
 #takes a list of 1xn vectors,
-#returns the mean of those values as a 1*n and the standard deviation 
+#returns the mean of those values as a 1*n and the standard deviation
 #excludes nan
 def mnstd(input_list):
     dat=np.array(input_list)
@@ -618,27 +622,27 @@ def asy_fit(xvls,yvls,asy_vl):
     from scipy import optimize
     fitfunc = lambda p, x:p[0]+((2*(asy_vl-p[0]))/(1+np.exp(p[1]*x))-(asy_vl-p[0]))
 
-    
-    errfunc = lambda p, x, y: fitfunc(p, x) - y # Distance to the target function    
+
+    errfunc = lambda p, x, y: fitfunc(p, x) - y # Distance to the target function
     p0 = [0.4,-0.07] # Initial guess for the parameters
     p1, success = optimize.leastsq(errfunc, p0[:], args=(xvls, yvls))
-    
-    
-            
-       
+
+
+
+
     return p1
-    
-    
-    
-    
-    
+
+
+
+
+
     try:
         fitpars, covmat = curve_fit(asy_func,input_xvls,input_yvls)
     except:
         pdb.set_trace()
-    return fitpars,covmat    
-    
-    
+    return fitpars,covmat
+
+
 def smooth_minimum_fit(xvls,yvls,**kwargs):
     neg_xvls=-xvls
     neg_yvls=yvls
@@ -649,8 +653,8 @@ def smooth_minimum_fit(xvls,yvls,**kwargs):
     sorted_yvls=yvls[xinds]
     smoothed_vls=smooth(sorted_yvls,16)
     pdb.set_trace()
-    
-    
+
+
     return minvl
 
 def smooth(x,beta):
@@ -662,8 +666,8 @@ def smooth(x,beta):
         pdb.set_trace()
         w = np.kaiser(window_len,beta)
         y = np.convolve(w/w.sum(),s,mode='valid')
-        return y[5:len(y)-5]    
-    
+        return y[5:len(y)-5]
+
 
 def exponential_fit_new(xdata,ydata):
     # define a von-Mises fitting function: B + A exp(k cos(2(theta - phi)) -1)
@@ -671,40 +675,40 @@ def exponential_fit_new(xdata,ydata):
     # p[1] = A
     # p[2] = k (1/D)
     # p[3] = phi
-    
+
     #fitfunc = lambda p, x: p[0] * np.exp( p[2]*( np.cos((x - p[1]))) )
     errfunc = lambda p, x, y: fitfunc_exponential_asymptote(p,x)-y
-    
+
     # set initial guess
     start_vl=np.mean(ydata[0:100])
     end_vl=np.mean(ydata[-100:])
     p0 = [start_vl,end_vl-start_vl,5]
     # fit
     p1, success = scipy.optimize.leastsq(errfunc, p0[:],args=(xdata,ydata))
-    
+
     #tw = (90./np.pi) * np.arccos(abs(1 + np.log((1.+np.exp(-2.*p1[2]))/2)/p1[2]) )
-    
+
     return p1, fitfunc(p1,xdata),success
 
 def plot_exponential_fit(ax,p,minvl=0,maxvl=15,color='k'):
     xvls=np.linspace(minvl,maxvl,1000)
-   
+
     yvls=p[0] + p[1]* (1- np.exp( - xvls/ p[2]))
     ax.plot(xvls,yvls,color=color,linewidth=0.5)
 def fitfunc_exponential_asymptote(p,x):
     #if p[2]>0.5:
     return p[0] + p[1]* (1- np.exp( - x/ p[2]))
     #else:
-    
-def cos_ls_fit(xvls,yvls,**kwargs): 
+
+def cos_ls_fit(xvls,yvls,**kwargs):
     from scipy import optimize
     if 'num_cycles' in kwargs:
         num_cycles=kwargs['num_cycles']
     else:
         num_cycles=0.5
     fitfunc = lambda p, x: p[0]*np.cos(num_cycles*(x-p[1]))  # Target function
-    
-    errfunc = lambda p, x, y: fitfunc(p, x) - y # Distance to the target function    
+
+    errfunc = lambda p, x, y: fitfunc(p, x) - y # Distance to the target function
     p0 = [80.0, 0.] # Initial guess for the parameters
     p1, success = optimize.leastsq(errfunc, p0[:], args=(xvls, yvls))
     []
@@ -713,8 +717,8 @@ def cos_ls_fit(xvls,yvls,**kwargs):
             pylab.figure()
             pylab.plot(xvls,yvls)
             pylab.plot(xvls,p1[0]*np.cos(num_cycles*(xvls-p1[1])),'r')
-            
-       
+
+
     return p1
 
 def vonmises_fit_new(xdata,ydata):
@@ -723,17 +727,17 @@ def vonmises_fit_new(xdata,ydata):
     # p[1] = A
     # p[2] = k (1/D)
     # p[3] = phi
-    
+
     #fitfunc = lambda p, x: p[0] * np.exp( p[2]*( np.cos((x - p[1]))) )
     errfunc = lambda p, x, y: fitfunc(p,x)-y
-    
+
     # initial guess
     p0 = [0.1,0.7,5]
     # fit
     p1, success = scipy.optimize.leastsq(errfunc, p0[:],args=(xdata,ydata))
-    
+
     #tw = (90./np.pi) * np.arccos(abs(1 + np.log((1.+np.exp(-2.*p1[2]))/2)/p1[2]) )
-    
+
     return p1, fitfunc(p1,xdata),success
 
 def fitfunc(p,x):
@@ -744,33 +748,33 @@ def fitfunc(p,x):
 
 
 
-def vonmises_fit(xvls,yvls,**kwargs): 
+def vonmises_fit(xvls,yvls,**kwargs):
     from scipy import optimize
     from scipy.stats import vonmises
-    
+
     #if 'num_cycles' in kwargs:
      #   num_cycles=kwargs['num_cycles']
     #else:
      #   num_cycles=0.5
     #fitfunc = lambda p, x: p[0]*vonmises.pdf(x-p[1],8)  # Target function
-    
-    #errfunc = lambda p, x, y: fitfunc(p, x) - y # Distance to the target function    
+
+    #errfunc = lambda p, x, y: fitfunc(p, x) - y # Distance to the target function
     #p0 = [10.0, 0.] # Initial guess for the parameters
-    
+
     popt,pcov = optimize.curve_fit(vonmises_fitfunc, xvls,yvls)
-    
+
     #if 'plot_flag' in kwargs:
      #   if kwargs['plot_flag']:
       #      pylab.figure()
        #     pylab.plot(xvls,yvls)
         #    pylab.plot(xvls,p1[0]*vonmises.pdf(xvls-p1[1],8),'r')
-            
-       
+
+
     return popt
 def errfunc_pos(p,x,y):
-    
+
     return vonmises_fitfunc(p,x)-y
-    
+
 def vonmises_fitfunc(x,a,b):
     from scipy.stats import vonmises
     if a>1:
@@ -778,27 +782,27 @@ def vonmises_fitfunc(x,a,b):
     else:
         return 1e10
 
-def rectified_cos_ls_fit(xvls,yvls,**kwargs): 
+def rectified_cos_ls_fit(xvls,yvls,**kwargs):
     from scipy import optimize
     if 'num_cycles' in kwargs:
         num_cycles=kwargs['num_cycles']
     else:
         num_cycles=0.5
     #fitfunc = lambda p, x: p[0]*np.cos(num_cycles*(x-p[1]))  # Target function
-    
-    #errfunc = lambda p, x, y: rectified_fit_func(p, x) - y # Distance to the target function    
+
+    #errfunc = lambda p, x, y: rectified_fit_func(p, x) - y # Distance to the target function
     #p0 = [20, 0.] # Initial guess for the parameters
     #p1, success = optimize.leastsq(errfunc, p0[:], args=(xvls, yvls))
     #pdb.set_trace()
     popt,pcov=optimize.curve_fit(rectified_fit_func,xvls,yvls)
-    
+
     if 'plot_flag' in kwargs:
         if kwargs['plot_flag']:
             pylab.figure()
             pylab.plot(xvls,yvls)
             pylab.plot(xvls,rectified_fit_func(xvls,popt[0],popt[1]),'r')
-            
-       
+
+
     return popt[1]
 
 def rectified_fit_func(x,a,b):
@@ -814,7 +818,7 @@ def rectified_fit_func(x,a,b):
         returnvl[zeroinds]=0
     except:
         pdb.set_trace()
-        returnvl=outvl 
+        returnvl=outvl
     #outvl[zeroinds[0]]=0
     #pdb.set_trace()
     return returnvl
@@ -825,7 +829,7 @@ def linear_ls_fit(xvls,yvls):
     try:
         p0=np.max(yvls)
         p1, success = optimize.leastsq(errfunc, p0, args=(xvls, yvls))
-    
+
         return p1
     except:
         p1=[]
@@ -853,7 +857,7 @@ def get_time(timestr,**kwargs):
     except:
         pdb.set_trace()
 def convert_str_time_to_min(timestr):
-    
+
     return 60*int(timestr[0:2])+int(timestr[2:4])
 
 #returns two columns with start and stop x values of continuous values
@@ -867,7 +871,7 @@ def find_consecutive_values(in_array):
             end_vls.append(cr_array[-1])
     except:
         pdb.set_trace()
-    return start_vls,end_vls    
+    return start_vls,end_vls
 
 def standardize_angle(input_angle,mod_angle,**kwargs):
     if 'test_flag' in kwargs:
@@ -889,7 +893,7 @@ def standardize_angle(input_angle,mod_angle,**kwargs):
             output_angle[output_neg_inds[0]]=output_angle[output_neg_inds[0]]+180.0
 
     else:
-        
+
         if input_angle>=0:
             output_angle=np.mod(input_angle,mod_angle)
         elif input_angle<0:
@@ -898,27 +902,27 @@ def standardize_angle(input_angle,mod_angle,**kwargs):
         if 'force_positive' in kwargs:
             if output_angle<0:
                 output_angle=output_angle+180.0
-    
+
     return output_angle
 
-#assumes input between 0 and 360 - maps to -180,180    
+#assumes input between 0 and 360 - maps to -180,180
 def center_deg_on_zero(invls):
     inds=np.where(invls>180)
     outvls=invls
     outvls[inds]=-(360-invls[inds])
-   
+
     return outvls
 def calculate_offset(mot,light,sensor_offset):
-           
+
     xvls=2*np.pi*np.mod(mot,stepsPerRotation)/stepsPerRotation
     yvls=self.light_level-np.mean(light)
     srtind=np.argsort(xvls)
     fitpars = cos_ls_fit(xvls[srtind],yvls[srtind])
-        
-    pdb.set_trace()    
+
+    pdb.set_trace()
     if fitpars[0]>0:
         minimum_pol_vl=np.pi/2+fitpars[1]
-        
+
     else:
         minimum_pol_vl=np.pi+fitpars[1]
     correct_polarizer_minimum_in_radians=np.pi/2-sensor_offset_radians_CW
@@ -940,7 +944,7 @@ def calc_spectrum(y,Fs):
     Y = scipy.fft(y)/n # fft computing and normalization
     Y = Y[range(n/2)]
     return frq,abs(Y)
-   
+
 
 def find_period(new_xvls,xvls_in,yvls_in):
     import peakdetect as peakdetect
@@ -958,7 +962,7 @@ def find_period(new_xvls,xvls_in,yvls_in):
     period=2.0*half_distance
     return output_vls, period,peak_data
 def realign_radial_data(rad_data,realign_vl):
-    
+
     offset_data=rad_data-realign_vl
     #this is a hack to keep values positive
     offset_data=offset_data+100*np.pi
@@ -981,7 +985,7 @@ def make_polarizer_fit_calculation(params,xvls,yvls):
     if 'filter_type' not in params:
         params['filter_type']='linear'
     if 'filter_type' in params:
-        
+
         if params['filter_type']=='linear':
             try:
                 fit0,fit1=cos_ls_fit(xvls,yvls,num_cycles=2,plot_flag=1)
@@ -1002,7 +1006,7 @@ def make_polarizer_fit_calculation(params,xvls,yvls):
             horiz_offset=fit1+offset_value_if_negative
         else:
             horiz_offset=fit1
-            
+
         if 'intensity_cue' in params.keys():
             if params['intensity_cue']:
                 new_horiz_offset=polarizer_correction_value+self.adjust_motor_for_intensity_cues(xvls,yvls,horiz_offset)
@@ -1010,5 +1014,5 @@ def make_polarizer_fit_calculation(params,xvls,yvls):
                 new_horiz_offset=polarizer_correction_value+horiz_offset
         else:
             new_horiz_offset=polarizer_correction_value+horiz_offset
-    
-    return new_horiz_offset   
+
+    return new_horiz_offset
