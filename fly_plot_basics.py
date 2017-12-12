@@ -420,7 +420,7 @@ def sub_plot_motor(ax,time,mot,linewidth=0.5,**kwargs):
         plot_flag=kwargs['plot_flag']
     except:
         plot_flag=True
-    pdb.set_trace()
+    
     try:
         col=kwargs['color']
     except:
