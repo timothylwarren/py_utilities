@@ -1639,6 +1639,7 @@ def call_vector_plot(crax,vecdt,**kwargs):
         crax.yaxis.labelpad= AXISPAD
 
 def sub_make_vector_plot(cr_vecdt,crax,**kwargs):
+    ADD_EXP_FIT=True
     flytype=kwargs['flytype']
     colors=kwargs['colors']
 
@@ -1669,7 +1670,11 @@ def sub_make_vector_plot(cr_vecdt,crax,**kwargs):
     colct=kwargs['colct']
 
     crax.plot(tm_to_plot,mn_to_plot,colors[np.mod(colct,4)],linewidth=0.5)
-
+    if ADD_EXP_FIT:
+            #p[0] + p[1]* (1- np.exp( - x/ p[2]))
+        fit_params,fit_func,success=calc.exponential_fit_new(tm_to_plot,mn_to_plot)
+            
+        calc.plot_exponential_fit(crax,fit_params,color=colors[np.mod(colct,4)],minvl=np.min(tm_to_plot),maxvl=np.max(tm_to_plot))
     if 'txt' in kwargs:
         crtext=kwargs['txt'][colct]
         crloc=kwargs['loc'][colct]

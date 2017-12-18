@@ -54,6 +54,9 @@ def line_vec_strength(indt,ax):
     ax.set_xlim([0,15])
 
 
+def mk_str(intlist):
+    return [str(i) for i in intlist]
+
 def add_text_name(ax,crdt):
     fname=crdt['fname']
     cutname=fname.split('/cloop')
@@ -340,15 +343,12 @@ def plot_motor(indt,ax,withhold_bottom_axis=False,one_line_label=False,xlabelpad
         fpl.adjust_spines(ax,['left','bottom'])
 
 
-
-    if withhold_bottom_axis:
-        fpl.adjust_spines(ax,['left'])
-        ax.get_xaxis().set_ticklabels([],fontsize=6)
-
     else:
-
-
-        fpl.adjust_spines(ax,['bottom'])
+        if withhold_bottom_axis:
+            fpl.adjust_spines(ax,['left'])
+            ax.get_xaxis().set_ticklabels([],fontsize=6)
+        else:
+             fpl.adjust_spines(ax,['bottom'])
 
         #elif (plot_left_axis) and (self.last_row_flag==0):
          #   ax.axis('off')
@@ -380,8 +380,18 @@ def plot_motor(indt,ax,withhold_bottom_axis=False,one_line_label=False,xlabelpad
         xticklabels=kwargs['xticklabels']
     else:
         xticks=[0,15]
-        xticklabels=['0','15']
+        xticklabels=mk_str(xticks)
 
+    try:
+        time_offset=kwargs['time_offset']
+    except:
+        time_offset=0
+
+    if time_offset:
+        
+        xticklabels=mk_str(np.array(xticks)+time_offset)
+
+    
     if plot_vert_flag:
         ax.plot([kwargs['plot_vertical'],kwargs['plot_vertical']],[-20,380],'r')
     if not withhold_bottom_axis:
@@ -393,6 +403,7 @@ def plot_motor(indt,ax,withhold_bottom_axis=False,one_line_label=False,xlabelpad
                 ax.get_xaxis().set_ticklabels(xticklabels,fontsize=6)
                 ax.set_xlabel('time (min.)', fontsize=6)
         except:
+           
             ax.get_xaxis().set_ticks(xticks)
             ax.get_xaxis().set_ticklabels(xticklabels,fontsize=6)
             ax.set_xlabel('time (min.)', fontsize=6)
@@ -425,6 +436,8 @@ def sub_plot_motor(ax,time,mot,linewidth=0.5,**kwargs):
         col=kwargs['color']
     except:
         col='k'
+
+
 
     absolute_diff_vls=abs(np.diff(mot))
     #these are indices to split the incoming array because the difference between neighboring
