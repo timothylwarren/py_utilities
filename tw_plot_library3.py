@@ -6,8 +6,9 @@ import numpy as np
 import matplotlib as mpl
 from matplotlib.lines import Line2D
 import matplotlib.pyplot as plt
-import fp_library as fpl
-import tw_calc_library as calc
+from py_utilities import tw_calc_library as calc
+from py_utilities import fp_library2 as fpl
+from py_utilities import tw_calc_library as calc
 from matplotlib.patches import Ellipse
 import matplotlib.colorbar as mpl_cbar
 
@@ -861,6 +862,7 @@ def plot_wing_diff_rotation_speed(ax,wd_deg,motvel_steps,steps_per_rotation,**kw
             vel_in_degrees=(vel_in_steps/steps_per_rotation)*360.
             vel_in_rotations=vel_in_degrees/360.0
             ax.plot(linear_gain_xvls,vel_in_rotations,'c')
+        pdb.set_trace()
         fpl.adjust_spines(ax,['left','bottom'])
         #ax.set_aspect(.00007)
 
@@ -1608,7 +1610,10 @@ def adjust_plotted_vls(pltax,transect_x_type,double_data_flag=False,trans_x_labe
 
 
 def call_vector_plot(crax,vecdt,**kwargs):
-
+    try:
+        add_exp_fit=kwargs['add_exp_fit']
+    except:
+        add_exp_fit=False
     flytype=kwargs['flytype']
     # if 'light' in flytype:
     #     self.excise_initial_time=True
@@ -1623,7 +1628,7 @@ def call_vector_plot(crax,vecdt,**kwargs):
         else:
             cr_vecdt=crdt[craxkey]
 
-        sub_make_vector_plot(cr_vecdt,crax,**kwargs)
+        fitparams=sub_make_vector_plot(cr_vecdt,crax,**kwargs)
         fpl.adjust_spines(crax,['left','bottom'])
         crax.set_xlabel('time (min.)',fontsize=6)
         crax.get_xaxis().set_ticks([0,15])
@@ -1637,9 +1642,14 @@ def call_vector_plot(crax,vecdt,**kwargs):
         crax.set_ylabel('vector strength',fontsize=6)
         crax.xaxis.labelpad = AXISPAD
         crax.yaxis.labelpad= AXISPAD
+    if add_exp_fit:
+        return fitparams
 
 def sub_make_vector_plot(cr_vecdt,crax,**kwargs):
-    ADD_EXP_FIT=True
+    try:
+        add_exp_fit=kwargs['add_exp_fit']
+    except:
+        add_exp_fit=False
     flytype=kwargs['flytype']
     colors=kwargs['colors']
 
@@ -1670,11 +1680,13 @@ def sub_make_vector_plot(cr_vecdt,crax,**kwargs):
     colct=kwargs['colct']
 
     crax.plot(tm_to_plot,mn_to_plot,colors[np.mod(colct,4)],linewidth=0.5)
-    if ADD_EXP_FIT:
+    if add_exp_fit:
             #p[0] + p[1]* (1- np.exp( - x/ p[2]))
         fit_params,fit_func,success=calc.exponential_fit_new(tm_to_plot,mn_to_plot)
             
         calc.plot_exponential_fit(crax,fit_params,color=colors[np.mod(colct,4)],minvl=np.min(tm_to_plot),maxvl=np.max(tm_to_plot))
+    else:
+        fitparams=[]
     if 'txt' in kwargs:
         crtext=kwargs['txt'][colct]
         crloc=kwargs['loc'][colct]
@@ -1708,3 +1720,5 @@ def sub_make_vector_plot(cr_vecdt,crax,**kwargs):
         #vecdt['tm']=tm
         #vecdt['crmean']=crmean
         #fh.save_to_file(pckfname,vecdt)
+
+    return fit_params

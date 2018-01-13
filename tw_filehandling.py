@@ -15,7 +15,7 @@ from py_utilities import tw_calc_library as calc
 #requires complete name
 def print_vert(indict):
     for x in indict:
-        print x
+        print(x)
 
 def parse_date(fname):
     split_fn=fname.split('/')
@@ -77,16 +77,18 @@ def change_pickle(pickle_fname,param_name,new_param_value):
 
 def open_pickle(pickle_fname):
     
-    print 'pickle_name is %s'%pickle_fname
-   
+    print('pickle_name is %s'%pickle_fname)
+    
     try:
         
         pickle_handle = open(pickle_fname,"rb")
-       
-        params=pickle.load(pickle_handle)
+        try:
+            params=pickle.load(pickle_handle)
+        except:
+            params=pickle.load(pickle_handle,encoding='bytes')
         pickle_handle.close()
     except:
-        print "no pickle file"
+        print("no pickle file")
         return
     return params
 
@@ -182,6 +184,7 @@ def get_dates(invls):
     else:
         crdate=[]
     return crdate
+
 def save_to_file(pckfname,sumstats,**kwargs):
     endbit=pckfname.split('/')[-1]
     base_str=pckfname.strip(endbit)

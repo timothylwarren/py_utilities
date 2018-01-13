@@ -6,7 +6,7 @@ import datetime
 import numpy.random as npr
 import scipy.stats as st
 import scipy.signal as sig
-import circ as circ
+from py_utilities import circ as circ
 import cmath as cmath
 import scipy
 #import tw_plot_library3 as plt
@@ -91,14 +91,14 @@ def count_ommatidia(dataFileName):
     arenaOuterElevation = np.pi/2 - np.arctan(arenaOuterRadius_mm/yOuter)
     arenaInnerElevation = np.pi/2 - np.arctan(arenaInnerRadius_mm/yInner)
 
-    print 'mirror spans an annulus from elevation', arenaOuterElevation*180/np.pi, 'to elevation', arenaInnerElevation*180/np.pi
-    print 'assuming DRA spans entire northern hemisphere and samples evenly across it, this means our stimulus covers', (arenaInnerElevation-arenaOuterElevation)*100./np.pi, 'percent of the DRA'
+    print ('mirror spans an annulus from elevation', arenaOuterElevation*180/np.pi, 'to elevation', arenaInnerElevation*180/np.pi)
+    print ('assuming DRA spans entire northern hemisphere and samples evenly across it, this means our stimulus covers', (arenaInnerElevation-arenaOuterElevation)*100./np.pi, 'percent of the DRA')
 
     ommatidiaViewingMirror = (ommatidiaElevations<arenaInnerElevation) & (ommatidiaElevations>arenaOuterElevation)
 
-    print 'number of ommatidia viewing mirror =', np.sum(ommatidiaViewingMirror.astype('int'))
-    print 'out of', numOmmatidia, 'total ommatidia'
-    print 'so', np.sum(ommatidiaViewingMirror.astype('int'))*100./float(numOmmatidia), 'percent of ommatidia view the mirror'
+    print ('number of ommatidia viewing mirror =', np.sum(ommatidiaViewingMirror.astype('int')))
+    print ('out of', numOmmatidia, 'total ommatidia')
+    print ('so', np.sum(ommatidiaViewingMirror.astype('int'))*100./float(numOmmatidia), 'percent of ommatidia view the mirror')
 
 
     arena_stats={}
@@ -470,21 +470,32 @@ def entropy(normhst):
     #assumes list of lists or list of arrays as input
 
 #assumes input in radians
+#rewritten january 2018 - check for backwards compatability???
 def force_angle_to_range(input_angle,**kwargs):
     try:
         force_range=kwargs['force_range']
     except:
         force_range='0_pi'
     if force_range is '0_pi':
-        mod_angle=input_angle
-        posinds=np.where(input_angle>0)[0]
-        mod_angle[posinds]=np.mod(input_angle,np.pi)
-        neginds=np.where(mod_angle<0)[0]
-        mod_angle[neginds]=np.mod(input_angle,-np.pi)
-        mod_angle=abs(mod_angle)
+        mod_angle=np.pi
+    
+   
+    elif force_range is '0_2pi':
+        mod_angle=2*np.pi
+        
+    posinds=np.where(input_angle>0)[0]
+    output_angle=input_angle
+    try:
+        output_angle[posinds]=np.mod(input_angle[posinds],mod_angle)
+    except:
+        pdb.set_trace()
+    neginds=np.where(output_angle<0)[0]
+    tmp_angle=np.mod(input_angle[neginds],-mod_angle)
+    output_angle[neginds]=abs(-mod_angle-tmp_angle)
+    
 
 
-    return mod_angle
+    return output_angle
 
 def get_2darray(input_dt):
     numrow=len(input_dt)
@@ -496,6 +507,33 @@ def get_2darray(input_dt):
     return output_array
 
 
+def remove_consecutive_integers_and_leave_last(input_list):
+    
+    difflist=np.where(np.diff(input_list)>1)[0]
+    try:
+        if len(input_list)>1:
+            multi_input_flag=True
+        else:
+            multi_input_flag=False
+    except:
+        multi_input_flag=False
+
+    
+    if len(difflist):
+        output_list=np.ndarray.tolist(input_list[difflist])
+        output_list.append(input_list[-1])
+    else:
+        output_list=[]
+        
+        if multi_input_flag:
+            output_list.append(input_list[-1])
+        else:
+            if input_list:
+                
+                output_list.append(input_list[-1])
+            
+        
+    return output_list
 
 def make_hist_calculations(crdeg,degbins):
         out_dt={}
@@ -558,10 +596,83 @@ def circ_mean(vls,**kwargs):
     return rad_to_deg(mnout),tmpvar
 
 
+def permute_diffs(paired_heading_list,**kwargs):
+    return_dict={}
+    try:
+        num_permutations=kwargs['num_permutations']
+    except:
+        num_permutations=10000
 
+    permuted_heading_diff=[]
+    permuted_hist=[]
 
+    for i in np.arange(num_permutations):
 
+        permuted_heading_diff.append(calc_permuted_heading_diff(paired_heading_list,**kwargs))
 
+       
+
+    return_dict['permuted_bnds']=np.percentile(np.median(rad_to_deg(permuted_heading_diff),axis=1),[5,50,95])
+    return_dict['permuted_dist']=np.nanmean(permuted_heading_diff,axis=1)
+
+    #return_dict['rad_permuted_bnds']=deg_to_rad(permuted_bnds)
+    return return_dict
+
+def calc_permuted_heading_diff(paired_heading_list,**kwargs):
+    permute_data=paired_heading_list
+    try:
+        permute_data[:,0]=npr.permutation(paired_heading_list[:,0])
+    except:
+        pdb.set_trace()
+    permute_data[:,1]=npr.permutation(paired_heading_list[:,1])
+    return calc_heading_diff(permute_data,calc_abs_diff=True,**kwargs)
+
+def calc_heading_diff(paired_heading_list,**kwargs):
+    mod_heading_diff=[]
+    cr_diff_list=[]
+    try:
+        max_diff=kwargs['max_diff']
+    except:
+        pdb.set_trace()
+        max_diff=np.pi/2
+
+    try:
+        abs_diff_flag=kwargs['calc_abs_diff']
+    except:
+        abs_diff_flag=False
+    try:
+        ncol=len(paired_heading_list[0,:])
+    except:
+        pdb.set_trace()
+        #if there are four rows
+    if ncol==4:
+        cr_diff=np.abs(paired_heading_list[:,1]-paired_heading_list[:,0])
+        cr_diff=np.append(cr_diff,np.abs(paired_heading_list[:,3]-paired_heading_list[:,2]))
+        #if there are two rows
+    if ncol==2:
+            #if abs_diff_flag:
+            #    cr_diff=np.abs(paired_heading_list[:,1]-paired_heading_list[:,0])
+             #   pdb.set_trace()
+            #else:
+        cr_diff=paired_heading_list[:,1]-paired_heading_list[:,0]
+
+    try:
+            highinds=np.where(cr_diff>(max_diff))
+    except:
+            pdb.set_trace()
+    lowinds=np.where(cr_diff<(-max_diff))
+    mod_heading_diff=cr_diff
+
+    mod_heading_diff[highinds[0]]=mod_heading_diff[highinds[0]]-np.pi
+    mod_heading_diff[lowinds[0]]=mod_heading_diff[lowinds[0]]+np.pi
+
+    if abs_diff_flag:
+        mod_heading_diff=np.abs(mod_heading_diff)
+
+    if type(mod_heading_diff) == tuple:
+
+        pdb.set_trace()
+    return mod_heading_diff
 
 def weighted_mean(mnvls,edges,**kwargs):
 
@@ -582,14 +693,14 @@ def weighted_mean(mnvls,edges,**kwargs):
         bin_middles=np.append(bin_middles,bin_middles[-1]+bin_middles[1])
     norm_mnvls=mnvls/sum(mnvls)
     veclist=[]
+    #total_mean=circ_mean(np.array(bin_middles),weights=norm_mnvls,anal_180=anal_180_flag)
 
-
-    # for ind,crmnvl in enumerate(norm_mnvls):
-    #     try:
-    #         veclist.append(bin_middles[ind]*crmnvl)
-    #     except:
-    #         pdb.set_trace()
-
+    for ind,crmnvl in enumerate(norm_mnvls):
+        try:
+          veclist.append(bin_middles[ind]*crmnvl)
+        except:
+            pdb.set_trace()
+    
     if mean_type is 'circ':
 
         total_mean,total_var=circ_mean(np.array(bin_middles),weights=norm_mnvls,anal_180=anal_180_flag)
@@ -667,6 +778,24 @@ def smooth(x,beta):
         w = np.kaiser(window_len,beta)
         y = np.convolve(w/w.sum(),s,mode='valid')
         return y[5:len(y)-5]
+
+
+def linear_fit(xdata,ydata):
+    errfunc = lambda p, x, y: fitfunc_linear(p,x)-y    
+
+
+
+    # set initial guess
+    start_vl=np.mean(ydata)
+    #end_vl=np.mean(ydata)
+    p0 = [start_vl,0]
+    
+    # fit
+    p1, success = scipy.optimize.leastsq(errfunc, p0[:],args=(xdata,ydata))
+    return p1, fitfunc_linear(p1,xdata),success
+
+def fitfunc_linear(p,x):
+    return p[0]+p[1]*x
 
 
 def exponential_fit_new(xdata,ydata):
@@ -884,8 +1013,11 @@ def standardize_angle(input_angle,mod_angle,**kwargs):
         output_angle=np.zeros(len(input_angle))
         posinds=np.where(input_angle>=0)
         neginds=np.where(input_angle<0)
-        output_angle[posinds[0]]=np.mod(input_angle[posinds[0]],mod_angle)
-        neg=np.mod(input_angle[neginds[0]],-mod_angle)
+        try:
+            output_angle[posinds[0]]=np.reshape(np.mod(input_angle[posinds[0]],mod_angle),len(posinds[0]))
+        except:
+            pdb.set_trace()
+        neg=np.reshape(np.mod(input_angle[neginds[0]],-mod_angle),len(neginds[0]))
         output_angle[neginds[0]]=mod_angle+neg
 
         if 'force_positive' in kwargs:
@@ -979,6 +1111,16 @@ def find_indices_of_one_array_in_other(large_array,array_to_place):
 
     return sorted_index
 
+#this is poor man's version of np.stack if not available
+def stack(arrays, axis=0):
+    
+    start_array=np.empty((len(arrays),len(arrays[0])))
+    for ind,cr_array in enumerate(arrays):
+        try:
+            start_array[ind,:]=cr_array
+        except:
+            pdb.set_trace()
+    return start_array
 
 
 def make_polarizer_fit_calculation(params,xvls,yvls):

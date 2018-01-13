@@ -4,10 +4,10 @@ import pdb
 import pylab
 import numpy as np
 from matplotlib.lines import Line2D
-import tw_plot_library3 as twplt
-import fp_library as fpl
-import tw_calc_library as calc
-import tw_filehandling as fh
+from py_utilities import tw_plot_library3 as twplt
+from py_utilities import fp_library2 as fpl
+from py_utilities import tw_calc_library as calc
+from py_utilities import tw_filehandling as fh
 #from matplotlib.patches import Ellipse
 
 import matplotlib.cm as cm
@@ -223,7 +223,7 @@ def plot_motor(indt,ax,withhold_bottom_axis=False,one_line_label=False,xlabelpad
     except:
         flag_360=0
     try:
-        offset_to_subtract=kwargs['offset_value_to_subtract']
+        offset_to_subtract=kwargs['offset_to_subtract']
     except:
         offset_to_subtract=0
     try:
@@ -303,7 +303,9 @@ def plot_motor(indt,ax,withhold_bottom_axis=False,one_line_label=False,xlabelpad
     if halt_flag:
         pdb.set_trace()
 
+    
     mot_rad=calc.deg_to_rad(mot_tmp)-offset_to_subtract
+    
     mot_tmp=calc.rad_to_deg(calc.standardize_angle(mot_rad,2*np.pi,force_positive=1))
     if center_on_zero_flag:
         mot=calc.center_deg_on_zero(mot_tmp)
@@ -340,9 +342,11 @@ def plot_motor(indt,ax,withhold_bottom_axis=False,one_line_label=False,xlabelpad
 
 
     if plot_left_axis:
-        fpl.adjust_spines(ax,['left','bottom'])
-
-
+        if not withhold_bottom_axis:
+            fpl.adjust_spines(ax,['left','bottom'])
+        else:
+            fpl.adjust_spines(ax,['left'])
+            ax.get_xaxis().set_ticklabels([],fontsize=6)
     else:
         if withhold_bottom_axis:
             fpl.adjust_spines(ax,['left'])
@@ -586,7 +590,7 @@ def arbitary_transect_from_heat_map(ax,heatdt,color='k',plot_mean=False,vecminvl
         histvl[crvecminvl]=norm_sumvls
         if not withhold_plot:
             crmean=calc.weighted_mean(norm_sumvls,heatdt['redges'],mn_type='norm')
-            ax.step(heatdt['redges'][:-1],norm_sumvls,color=color,drawstyle='steps-post',linewidth=0.5)
+            ax.step(heatdt['redges'][:-1],norm_sumvls,color=color,linewidth=0.5)
             if plot_mean:
 
                 ax.plot(crmean,kwargs['mnht'],'v',color=color,markersize=2,clip_on=False)

@@ -15,9 +15,9 @@ def circmean(alpha,axis=None, **kwargs):
         
         N=len(vals_list)
        
-        mean_angle = np.arctan2(stats.nanmean(np.sin(vals_list),axis),stats.nanmean(np.cos(vals_list),axis))
+        mean_angle = np.arctan2(np.nanmean(np.sin(vals_list),axis),np.nanmean(np.cos(vals_list),axis))
     else:
-        mean_angle = np.arctan2(stats.nanmean(np.sin(alpha),axis),stats.nanmean(np.cos(alpha),axis))
+        mean_angle = np.arctan2(np.nanmean(np.sin(alpha),axis),np.nanmean(np.cos(alpha),axis))
     
     return mean_angle
     
