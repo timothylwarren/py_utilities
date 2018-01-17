@@ -82,7 +82,7 @@ def fill_between_steps(x, y1, y2=0, h_align='mid', ax=None, **kwargs):
 
     # now to the plotting part:
 
-    ax.fill_between(xx, y1, y2=y2, edgecolor='none',**kwargs)
+    ax.fill_between(xx, y1, y2=y2,**kwargs)
 
     return ax
 
@@ -1351,6 +1351,7 @@ def determine_and_plot_transects(pltax,crdt,offset=0,transect_x_type='vector',**
         no_legend=False
 
     [array_transect_vls,x_unsorted]=get_summed_vls(crdt,transect_x_type,**kwargs)
+    
     plot_summed_vls(pltax,array_transect_vls,transect_x_type,x_unsorted,**kwargs)
     adjust_plotted_vls(pltax,transect_x_type, **kwargs)
     return array_transect_vls
@@ -1469,10 +1470,15 @@ def get_array_transect_vls(crdt,vec_ind,double_data_flag=False,offset_to_add=[],
     return array_transect_vls_out,x_unsorted
 
 def plot_summed_vls(pltax,array_transect_vls,transect_x_type,x_unsorted,split_flag=False,**kwargs):
+    
+    try:
+        filled_flag=kwargs['filled_flag']
+    except:
+        filled_flag=False
+
     if transect_x_type=='vector':
 
         for crind,cr_row in enumerate(array_transect_vls):
-
 
             try:
 
@@ -1484,7 +1490,7 @@ def plot_summed_vls(pltax,array_transect_vls,transect_x_type,x_unsorted,split_fl
             #strvl=legend_text[crind]
 
     elif transect_x_type == 'position':
-
+       
         if not split_flag:
             yplt=np.array(array_transect_vls)
 
@@ -1494,8 +1500,11 @@ def plot_summed_vls(pltax,array_transect_vls,transect_x_type,x_unsorted,split_fl
             try:
                 pltax.step(x_unsorted[sortinds],yplt[0][sortinds],color=kwargs['transect_colvls'],linewidth=0.5)
             except:
-                pltax.step(x_unsorted[sortinds],yplt[sortinds],color=kwargs['transect_colvls'][0],linewidth=0.5)
-
+                if not filled_flag:
+                    pltax.step(x_unsorted[sortinds],yplt[sortinds],color=kwargs['transect_colvls'][0],linewidth=0.5)
+                else:
+                    pdb.set_trace()
+                    fill_between_steps(x_unsorted[sortinds], yplt[sortinds], edgecolor=kwargs['transect_colvls'][0], facecolor=kwargs['transect_colvls'][0],linewidth=0.5,alpha=0.5,y2=0, h_align='mid', ax=pltax)
 
 
             mnvl,varvl=calc.weighted_mean(yplt[sortinds],x_unsorted[sortinds])
