@@ -21,6 +21,15 @@ def circmean(alpha,axis=None, **kwargs):
     
     return mean_angle
     
+
+def vector_coherence_with_zero_deg(alpha, **kwargs):
+    axis=None
+    vals_list=get_vec_list(alpha,**kwargs)
+    N=len(vals_list)
+    R=np.sum(np.cos(alpha))/N
+    V=1-R
+    return V
+
 def circvar(alpha,axis=None,**kwargs):
     if np.ma.isMaskedArray(alpha) and alpha.mask.shape!=():
         N = np.sum(~alpha.mask,axis)

@@ -30,6 +30,27 @@ def my_formatter(x, pos):
         return str(x)
 
 
+def scatter_polar(crax,plt_rad,plt_vec,)
+
+    if PLOT_MEAN_DISPLACEMENT:
+                    
+                    od=self.summary_stats(mn_rad_no_offset[~np.isnan(mn_rad_no_offset)],plt_vec)
+                    overall_mn_to_plot=calc.deg_to_rad(od['mn'])+offset_angle
+                    overall_vec_to_plot=1-od['var']
+                    
+                    crax.plot([overall_mn_to_plot,overall_mn_to_plot],[0,overall_vec_to_plot],linewidth=0.4,color='r',zorder=2)
+                    
+                crax.plot([plt_rad, plt_rad],[np.zeros(len(plt_vec)), plt_vec],linewidth=0.2,color=[0.5,0.5,0.5],zorder=1)
+                strblock='n='+str(len(plt_rad))
+                crax.text(np.pi/2,1.2,strblock,fontsize=8)
+                crax.text(3*np.pi/2,1.4,flytype,fontsize=8)
+                crax.scatter(plt_rad,plt_vec, color='0.2', s=6,alpha=0.5,zorder=2)
+                crax.get_xaxis().set_ticks([0,np.pi/2.,np.pi,3.*(np.pi/2.)])
+                crax.get_xaxis().set_ticklabels(['270','0','90','180'],fontsize=6)
+                crax.get_yaxis().set_ticks([])
+                crax.get_yaxis().set_ticklabels([],fontsize=8)
+
+                crax.set_ylim([0,1.0])
 
 
 
