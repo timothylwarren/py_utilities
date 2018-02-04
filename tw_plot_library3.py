@@ -34,7 +34,7 @@ def scatter_polar(crax,plt_rad,plt_vec,)
 
     if PLOT_MEAN_DISPLACEMENT:
                     
-                    od=self.summary_stats(mn_rad_no_offset[~np.isnan(mn_rad_no_offset)],plt_vec)
+                     od=self.summary_stats(mn_rad_no_offset[~np.isnan(mn_rad_no_offset)],plt_vec)
                     overall_mn_to_plot=calc.deg_to_rad(od['mn'])+offset_angle
                     overall_vec_to_plot=1-od['var']
                     
