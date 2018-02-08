@@ -19,7 +19,13 @@ import matplotlib.cm as cm
 from matplotlib.ticker import FuncFormatter
 
 AXISPAD=-5
-pylab.ion()
+
+
+mpl.rcParams['svg.fonttype']='none'
+mpl.rcParams['font.family']='sans-serif'
+mpl.rcParams['font.sans-serif']='Arial'
+
+#pylab.ion()
 
 
 def my_formatter(x, pos):
@@ -30,27 +36,27 @@ def my_formatter(x, pos):
         return str(x)
 
 
-def scatter_polar(crax,plt_rad,plt_vec,)
+def scatter_polar(crax,plt_rad,plt_vec,offset_angle=np.pi/2,**kwargs):
 
-    if PLOT_MEAN_DISPLACEMENT:
-                    
-                     od=self.summary_stats(mn_rad_no_offset[~np.isnan(mn_rad_no_offset)],plt_vec)
-                    overall_mn_to_plot=calc.deg_to_rad(od['mn'])+offset_angle
-                    overall_vec_to_plot=1-od['var']
-                    
-                    crax.plot([overall_mn_to_plot,overall_mn_to_plot],[0,overall_vec_to_plot],linewidth=0.4,color='r',zorder=2)
-                    
-                crax.plot([plt_rad, plt_rad],[np.zeros(len(plt_vec)), plt_vec],linewidth=0.2,color=[0.5,0.5,0.5],zorder=1)
-                strblock='n='+str(len(plt_rad))
-                crax.text(np.pi/2,1.2,strblock,fontsize=8)
-                crax.text(3*np.pi/2,1.4,flytype,fontsize=8)
-                crax.scatter(plt_rad,plt_vec, color='0.2', s=6,alpha=0.5,zorder=2)
-                crax.get_xaxis().set_ticks([0,np.pi/2.,np.pi,3.*(np.pi/2.)])
-                crax.get_xaxis().set_ticklabels(['270','0','90','180'],fontsize=6)
-                crax.get_yaxis().set_ticks([])
-                crax.get_yaxis().set_ticklabels([],fontsize=8)
+    if kwargs['plot_mean']:
+        ss=kwargs['sumstats']
 
-                crax.set_ylim([0,1.0])
+        overall_mn_to_plot=calc.deg_to_rad(ss['mn'])+offset_angle
+        overall_vec_to_plot=1-ss['var']
+
+        crax.plot([overall_mn_to_plot,overall_mn_to_plot],[0,overall_vec_to_plot],linewidth=0.4,color='r',zorder=2)
+
+    #crax.plot([plt_rad, plt_rad],[np.zeros(len(plt_vec)), plt_vec],linewidth=0.2,color=[0.5,0.5,0.5],zorder=1)
+    strblock='n='+str(len(plt_rad))
+    crax.text(np.pi/2,1.2,strblock,fontsize=8)
+
+    crax.scatter(plt_rad,plt_vec, color='k', s=4,zorder=2)
+    crax.get_xaxis().set_ticks([0,np.pi/2.,np.pi,3.*(np.pi/2.)])
+    crax.get_xaxis().set_ticklabels(['270','0','90','180'],fontsize=6)
+    crax.get_yaxis().set_ticks([])
+    crax.get_yaxis().set_ticklabels([],fontsize=8)
+
+    crax.set_ylim([0,1.0])
 
 
 
@@ -201,7 +207,7 @@ def scatterplot(ax,xvl,yvl,sizefactor=0.3,**kwargs):
         #ax.scatter(arena_stats['ommatidiaAzimuths']*180/np.pi,arena_stats['ommatidiaElevations']*180/np.pi,color='k',s=0.3)
         if not rasterize:
             #ax.scatter(np.array(xvl), np.array(yvl),  edgecolor='k',facecolor='k',s=sizefactor,alpha=0.5,clip_on=False)
-        
+
             ax.scatter(np.array(xvl), np.array(yvl), c='k',s=sizefactor,clip_on=False)
 
             if double_horizontal_ax:
@@ -1372,7 +1378,7 @@ def determine_and_plot_transects(pltax,crdt,offset=0,transect_x_type='vector',**
         no_legend=False
 
     [array_transect_vls,x_unsorted]=get_summed_vls(crdt,transect_x_type,**kwargs)
-    
+
     plot_summed_vls(pltax,array_transect_vls,transect_x_type,x_unsorted,**kwargs)
     adjust_plotted_vls(pltax,transect_x_type, **kwargs)
     return array_transect_vls
@@ -1491,7 +1497,7 @@ def get_array_transect_vls(crdt,vec_ind,double_data_flag=False,offset_to_add=[],
     return array_transect_vls_out,x_unsorted
 
 def plot_summed_vls(pltax,array_transect_vls,transect_x_type,x_unsorted,split_flag=False,**kwargs):
-    
+
     try:
         filled_flag=kwargs['filled_flag']
     except:
@@ -1511,7 +1517,7 @@ def plot_summed_vls(pltax,array_transect_vls,transect_x_type,x_unsorted,split_fl
             #strvl=legend_text[crind]
 
     elif transect_x_type == 'position':
-       
+
         if not split_flag:
             yplt=np.array(array_transect_vls)
 
@@ -1713,7 +1719,7 @@ def sub_make_vector_plot(cr_vecdt,crax,**kwargs):
     if add_exp_fit:
             #p[0] + p[1]* (1- np.exp( - x/ p[2]))
         fit_params,fit_func,success=calc.exponential_fit_new(tm_to_plot,mn_to_plot)
-            
+
         calc.plot_exponential_fit(crax,fit_params,color=colors[np.mod(colct,4)],minvl=np.min(tm_to_plot),maxvl=np.max(tm_to_plot))
     else:
         fitparams=[]
