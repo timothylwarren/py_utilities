@@ -572,7 +572,7 @@ def make_heat_map(ax,heatdt,**kwargs):
 
 
 
-def arbitary_transect_from_heat_map(ax,heatdt,color='k',plot_mean=False,vecminvls=[0.9],withhold_plot=False,**kwargs):
+def arbitrary_transect_from_heat_map(ax,heatdt,color='k',plot_mean=False,vecminvls=[0.9],withhold_plot=False,**kwargs):
 
     histvl={}
 

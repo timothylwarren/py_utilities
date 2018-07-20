@@ -119,8 +119,12 @@ def count_ommatidia(dataFileName):
 def decimate(crdt,decimate_ratio):
     #remove first N values as they appear to be erroneous
     chop_values=10
-    tst=sig.decimate(crdt,decimate_ratio)
-    return tst[chop_values:]
+    try:
+        tst=sig.decimate(np.array(crdt),decimate_ratio)
+
+        return tst[chop_values:]
+    except:
+        pdb.set_trace()
 def make_histogram_confidence_intervals(indata,bnds,num_bins):
     #calculate histogram n times
     sumhist=[]
@@ -469,7 +473,7 @@ def entropy(normhst):
 
     #assumes list of lists or list of arrays as input
 
-#assumes input in radians
+#assumes input in radians, assumes array
 #rewritten january 2018 - check for backwards compatability???
 def force_angle_to_range(input_angle,**kwargs):
     try:
