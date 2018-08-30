@@ -41,12 +41,10 @@ def scatter_polar(crax,plt_rad,plt_vec,offset_angle=np.pi/2,color='k',**kwargs):
         withhold_ticks=kwargs['withhold_direction_ticks']
     except:
         withhold_ticks=False
-    try:
-        crcol=kwargs['color']
-    except:
-        crcol='k'
+    
+   
 
-
+    
     if kwargs['plot_mean']:
         ss=kwargs['sumstats']
 
@@ -55,11 +53,12 @@ def scatter_polar(crax,plt_rad,plt_vec,offset_angle=np.pi/2,color='k',**kwargs):
 
         crax.plot([overall_mn_to_plot,overall_mn_to_plot],[0,overall_vec_to_plot],linewidth=0.4,color='g',zorder=2)
 
-    crax.plot([plt_rad, plt_rad],[np.zeros(len(plt_vec)), plt_vec],linewidth=0.2,color=crcol,zorder=1)
+    crax.plot([plt_rad, plt_rad],[np.zeros(len(plt_vec)), plt_vec],linewidth=0.2,color=color,zorder=1)
+    
     strblock='n='+str(len(plt_rad))
     crax.text(np.pi/2,1.2,strblock,fontsize=8)
 
-    crax.scatter(plt_rad,plt_vec, color=crcol, s=3,zorder=2)
+    crax.scatter(plt_rad,plt_vec, color=color, s=3,zorder=2)
     if not withhold_ticks:
         crax.get_xaxis().set_ticks([0,np.pi/2.,np.pi,3.*(np.pi/2.)])
         crax.get_xaxis().set_ticklabels(['270','0','90','180'],fontsize=6)
