@@ -19,6 +19,7 @@ import csv
 
 
 def permute_test_for_mean_diff_between_two_groups(dat1, dat2, num_permutations=10000):
+    #assume dat2 higher than dat1
     len_dat1=len(dat1)
     len_dat2=len(dat2)
     diff_list=[]
@@ -30,8 +31,8 @@ def permute_test_for_mean_diff_between_two_groups(dat1, dat2, num_permutations=1
             tmptst=dat1+dat2
         npr.shuffle(tmptst)
         diff_list.append(np.mean(tmptst[0:len_dat1])-np.mean(tmptst[len_dat1:]))
-
-    return diff_list
+    pctile=st.percentileofscore(diff_list,np.mean(dat1)-np.mean(dat2))
+    return diff_list,pctile
 
 def calc_offset_hist(indt,offset_value):
     mot_inds=np.arange(0,len(indt['time_in_min']))
@@ -482,11 +483,11 @@ def force_angle_to_range(input_angle,**kwargs):
         force_range='0_pi'
     if force_range is '0_pi':
         mod_angle=np.pi
-    
-   
+
+
     elif force_range is '0_2pi':
         mod_angle=2*np.pi
-        
+
     posinds=np.where(input_angle>0)[0]
     output_angle=input_angle
     try:
@@ -496,7 +497,7 @@ def force_angle_to_range(input_angle,**kwargs):
     neginds=np.where(output_angle<0)[0]
     tmp_angle=np.mod(input_angle[neginds],-mod_angle)
     output_angle[neginds]=abs(-mod_angle-tmp_angle)
-    
+
 
 
     return output_angle
@@ -512,7 +513,7 @@ def get_2darray(input_dt):
 
 
 def remove_consecutive_integers_and_leave_last(input_list):
-    
+
     difflist=np.where(np.diff(input_list)>1)[0]
     try:
         if len(input_list)>1:
@@ -522,21 +523,21 @@ def remove_consecutive_integers_and_leave_last(input_list):
     except:
         multi_input_flag=False
 
-    
+
     if len(difflist):
         output_list=np.ndarray.tolist(input_list[difflist])
         output_list.append(input_list[-1])
     else:
         output_list=[]
-        
+
         if multi_input_flag:
             output_list.append(input_list[-1])
         else:
             if input_list:
-                
+
                 output_list.append(input_list[-1])
-            
-        
+
+
     return output_list
 
 def make_hist_calculations(crdeg,degbins):
@@ -614,7 +615,7 @@ def permute_diffs(paired_heading_list,**kwargs):
 
         permuted_heading_diff.append(calc_permuted_heading_diff(paired_heading_list,**kwargs))
 
-       
+
 
     return_dict['permuted_bnds']=np.percentile(np.median(rad_to_deg(permuted_heading_diff),axis=1),[5,50,95])
     return_dict['permuted_dist']=np.nanmean(permuted_heading_diff,axis=1)
@@ -704,7 +705,7 @@ def weighted_mean(mnvls,edges,**kwargs):
           veclist.append(bin_middles[ind]*crmnvl)
         except:
             pdb.set_trace()
-    
+
     if mean_type is 'circ':
 
         total_mean,total_var=circ_mean(np.array(bin_middles),weights=norm_mnvls,anal_180=anal_180_flag)
@@ -785,7 +786,7 @@ def smooth(x,beta):
 
 
 def linear_fit(xdata,ydata):
-    errfunc = lambda p, x, y: fitfunc_linear(p,x)-y    
+    errfunc = lambda p, x, y: fitfunc_linear(p,x)-y
 
 
 
@@ -793,7 +794,7 @@ def linear_fit(xdata,ydata):
     start_vl=np.mean(ydata)
     #end_vl=np.mean(ydata)
     p0 = [start_vl,0]
-    
+
     # fit
     p1, success = scipy.optimize.leastsq(errfunc, p0[:],args=(xdata,ydata))
     return p1, fitfunc_linear(p1,xdata),success
@@ -1117,7 +1118,7 @@ def find_indices_of_one_array_in_other(large_array,array_to_place):
 
 #this is poor man's version of np.stack if not available
 def stack(arrays, axis=0):
-    
+
     start_array=np.empty((len(arrays),len(arrays[0])))
     for ind,cr_array in enumerate(arrays):
         try:
