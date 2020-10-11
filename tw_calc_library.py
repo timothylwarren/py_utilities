@@ -34,6 +34,30 @@ def permute_test_for_mean_diff_between_two_groups(dat1, dat2, num_permutations=1
     pctile=st.percentileofscore(diff_list,np.mean(dat1)-np.mean(dat2))
     return diff_list,pctile
 
+
+def permute_test_for_mean_diff_sampling_from_rows(dat1, dat2, num_permutations=10000):
+    #this is specifically for case in which there are two samples from each 
+    #individual but permutation should be across individuals.
+    nvls_array1=len(dat1)
+    nvls_array2=len(dat2)
+    total_length=nvls_array1+nvls_array2
+    diff_list=[]
+    for cr_permutation in np.arange(num_permutations):
+        if type(dat1) is np.ndarray:
+
+            tmptst=np.concatenate((dat1,dat2))
+        else:
+            tmptst=dat1+dat2
+        row_inds=np.arange(total_length)
+        npr.shuffle(row_inds)
+        
+        diff_list.append(np.nanmean(tmptst[row_inds[0:nvls_array1],:])-np.nanmean(tmptst[row_inds[nvls_array1:],:]))
+    
+    pctile=st.percentileofscore(diff_list,np.nanmean(dat1)-np.nanmean(dat2))
+    return diff_list,pctile
+
+
+
 def calc_offset_hist(indt,offset_value):
     mot_inds=np.arange(0,len(indt['time_in_min']))
 
@@ -358,7 +382,51 @@ def resample_for_threshold(indata,**kwargs):
     thresh_val=np.percentile(np.random.choice(indata,1000),95)
     return thresh_val
 
+#resampling across rows
+#
 
+
+
+
+
+def resample_for_confidence_intervals(indata,rows_flag=False,num_permutations=1000):
+    #how many rows of indata.
+    all_means=[]
+    pctiles=[]
+
+    if rows_flag:
+        total_length=len(indata[:,0])
+        row_inds=np.arange(total_length)
+        
+        #FOR loop of 10K
+            #draw a random sample of number of rows
+            #calculate a mean of data
+            #ha
+        for cr_permutation in np.arange(num_permutations):
+            crinds=np.random.choice(row_inds,total_length)
+            all_means.append(circ.circmean(indata[crinds,:]))
+            #calculate nanmean, add to list
+    else:
+        total_length=len(indata)
+        row_inds=np.arange(total_length)
+        all_means=[]
+        for cr_permutation in np.arange(num_permutations):
+            crinds=np.random.choice(row_inds,total_length)
+            all_means.append(circ.circmean(indata[crinds]))
+
+    if np.percentile(np.abs(all_means),50) >np.pi/2:
+        pos_means=force_angle_to_range(all_means,force_range='0_2pi')
+    else:
+        pos_means=all_means
+    try:
+        
+        pctiles.append(np.percentile(pos_means,[2.5]))
+    except:
+        pdb.set_trace()
+    pctiles.append(np.percentile(pos_means,[50]))
+    pctiles.append(np.percentile(pos_means,[97.5]))
+    
+    return pctiles
 
 def make_gaussian_weights(numpts,**kwargs):
         #6 is chosen to get ends to 0
@@ -477,6 +545,8 @@ def entropy(normhst):
 #assumes input in radians, assumes array
 #rewritten january 2018 - check for backwards compatability???
 def force_angle_to_range(input_angle,**kwargs):
+    input_array=np.array(input_angle)
+
     try:
         force_range=kwargs['force_range']
     except:
@@ -488,19 +558,19 @@ def force_angle_to_range(input_angle,**kwargs):
     elif force_range is '0_2pi':
         mod_angle=2*np.pi
 
-    posinds=np.where(input_angle>0)[0]
-    output_angle=input_angle
+    posinds=np.where(np.array(input_array)>0)[0]
+    output_angle=np.copy(input_array)
     try:
-        output_angle[posinds]=np.mod(input_angle[posinds],mod_angle)
+        output_angle[posinds]=np.mod(np.array(input_array)[posinds],mod_angle)
     except:
         pdb.set_trace()
-    neginds=np.where(output_angle<0)[0]
-    tmp_angle=np.mod(input_angle[neginds],-mod_angle)
+    neginds=np.where(np.array(output_angle)<0)[0]
+    tmp_angle=np.mod(np.array(input_array)[neginds],-mod_angle)
     output_angle[neginds]=abs(-mod_angle-tmp_angle)
 
 
 
-    return output_angle
+    return np.array(output_angle)
 
 def get_2darray(input_dt):
     numrow=len(input_dt)

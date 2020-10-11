@@ -2,7 +2,7 @@
 #this is twplot_library.py
 
 import pickle
-import pdb
+#import pdb
 import pylab
 import datetime
 import numpy as np
@@ -10,7 +10,7 @@ import os
 import shutil
 import time
 import sys
-from py_utilities import tw_calc_library as calc
+#from py_utilities import tw_calc_library as calc
 
 #requires complete name
 def print_vert(indict):
@@ -75,17 +75,21 @@ def change_pickle(pickle_fname,param_name,new_param_value):
     save_to_pickle(pickle_fname,params)
 
 
-def open_pickle(pickle_fname):
-    
+def open_pickle(pickle_fname, **kwargs):
+    try:
+        encoding=kwargs['encoding']
+        encoding_flag=True
+    except:
+        encoding_flag=False
     print('pickle_name is %s'%pickle_fname)
     
     try:
-        
+       
         pickle_handle = open(pickle_fname,"rb")
-        try:
+        if not encoding_flag:
             params=pickle.load(pickle_handle)
-        except:
-            params=pickle.load(pickle_handle,encoding='bytes')
+        else:
+            params=pickle.load(pickle_handle,encoding=encoding)
         pickle_handle.close()
     except:
         print("no pickle file")

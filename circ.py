@@ -6,6 +6,7 @@ import numpy as np
 from scipy import stats
 import warnings
 import pdb
+from scipy.signal import butter, lfilter, freqz
 
 def circmean(alpha,axis=None, **kwargs):
     
@@ -22,6 +23,17 @@ def circmean(alpha,axis=None, **kwargs):
     return mean_angle
     
 
+def circfilter(alpha):
+    order = 6
+    fs = 40.0       # sample rate, Hz
+    cutoff = 0.08  
+    sinvls=np.sin(alpha)
+    cosvls=np.cos(alpha)
+    filt={}
+    filt['sin']=butter_lowpass_filter(sinvls,cutoff,fs,order)
+    filt['cos']=butter_lowpass_filter(cosvls,cutoff,fs,order)
+    ret_angle=np.arctan2(filt['sin'], filt['cos'])
+    return ret_angle
 def vector_coherence_with_zero_deg(alpha, **kwargs):
     axis=None
     vals_list=get_vec_list(alpha,**kwargs)
@@ -68,5 +80,14 @@ def circdiff(alpha,beta):
     D = np.arctan2(np.sin(alpha-beta),np.cos(alpha-beta))
     return D
 
+def butter_lowpass(cutoff, fs, order=5):
+    nyq = 0.5 * fs
+    normal_cutoff = cutoff / nyq
+    b, a = butter(order, normal_cutoff, btype='low', analog=False)
+    return b, a
 
+def butter_lowpass_filter(data, cutoff, fs, order=5):
+    b, a = butter_lowpass(cutoff, fs, order=order)
+    y = lfilter(b, a, data)
+    return y
 

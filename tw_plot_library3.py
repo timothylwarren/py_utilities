@@ -1,7 +1,6 @@
 #!/usr/bin/python
 #this is twplot_library.py
 import pdb
-import pylab
 import numpy as np
 import matplotlib as mpl
 from matplotlib.lines import Line2D
@@ -41,11 +40,14 @@ def scatter_polar(crax,plt_rad,plt_vec,offset_angle=np.pi/2,color='k',**kwargs):
         withhold_ticks=kwargs['withhold_direction_ticks']
     except:
         withhold_ticks=False
-    
+    try:
+        plot_mean=kwargs['plot_mean']
+    except:
+        plot_mean=False
    
 
     
-    if kwargs['plot_mean']:
+    if plot_mean:
         ss=kwargs['sumstats']
 
         overall_mn_to_plot=calc.deg_to_rad(ss['mn'])+offset_angle
@@ -53,12 +55,12 @@ def scatter_polar(crax,plt_rad,plt_vec,offset_angle=np.pi/2,color='k',**kwargs):
 
         crax.plot([overall_mn_to_plot,overall_mn_to_plot],[0,overall_vec_to_plot],linewidth=0.4,color='g',zorder=2)
 
-    crax.plot([plt_rad, plt_rad],[np.zeros(len(plt_vec)), plt_vec],linewidth=0.2,color=color,zorder=1)
+    crax.plot([plt_rad+offset_angle, plt_rad+offset_angle],[np.zeros(len(plt_vec)), plt_vec],linewidth=0.2,color=color,zorder=1)
     
     strblock='n='+str(len(plt_rad))
     crax.text(np.pi/2,1.2,strblock,fontsize=8)
 
-    crax.scatter(plt_rad,plt_vec, color=color, s=3,zorder=2)
+    crax.scatter(plt_rad+offset_angle,plt_vec, color=color, s=3,zorder=2)
     if not withhold_ticks:
         crax.get_xaxis().set_ticks([0,np.pi/2.,np.pi,3.*(np.pi/2.)])
         crax.get_xaxis().set_ticklabels(['270','0','90','180'],fontsize=6)
@@ -1169,9 +1171,10 @@ def plot_hist(axh,indata,**kwargs):
     if shift_vertical:
 
         data=data+np.pi/2
-
-    bin_width=(BNDS[1]-BNDS[0])/NUM_BINS
-
+    try:
+        bin_width=(BNDS[1]-BNDS[0])/NUM_BINS
+    except:
+        pdb.set_trace()
 
     bins=np.linspace(BNDS[0],BNDS[1],NUM_BINS+1)
     inarray=data[~np.isnan(data)]
